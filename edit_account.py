@@ -1,263 +1,549 @@
-# imports:
-from imports import tk, ttk, messagebox, convert_bin_txt, convert_txt_bin, hashlib, alpha
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QFrame, QLabel, QLineEdit, QPushButton, QAction, QMessageBox
+from PyQt5.QtGui import QIcon, QFont
+from setTheme import *
+from additional_classes import random, alpha, convert_bin_txt, convert_txt_bin
 
 
-class Edit_account(tk.Frame):
-    def __init__(self, master=None, name_list=None, software_to_id=None, software_to_password=None,
-                 default_name_list=None, seed=None):
-        super().__init__(master)
-        self.root = master
-        self.name_list = name_list
-        self.software_to_id = software_to_id
-        self.software_to_password = software_to_password
-        self.default_name_list = default_name_list
-        self.root.title("Edit an account")
-        self.root.geometry("500x600")
-        self.root.resizable(height=False, width=False)
-        self.root.config(bg='black')
-        self.create_widget()
-        self.seed = seed
-        self.account_name_combobox.bind('<<ComboboxSelected>>', self.update_widget)
+class EditAccount(QDialog):
+    def __init__(self, main_self, accName):
+        super().__init__(None, Qt.WindowCloseButtonHint | Qt.WindowTitleHint)
+        ### hide the window
+        self.hide()
+        ### make the window modal
+        self.setWindowModality(Qt.ApplicationModal)
+        ### access the main self
+        self.main_self = main_self
+        self.accName = accName
+        self.accAlias = self.main_self.name_to_alias[self.accName]
+        self.accID = self.main_self.name_to_ID[self.accName]
+        self.accEmail = self.main_self.name_to_email[self.accName]
+        self.accPassword = self.main_self.name_to_password[self.accName]
+        ### build the window
+        self.build()
 
-    def create_widget(self):
-        try:
-            self.root.iconbitmap("resources/password_icon.ico")
-        except:
-            messagebox.showerror("Error", "An error has occurred, quit the software")
-        # label
-        self.label = tk.Label(self.root, text="Select the name of the account you want to change:", fg="white",
-                              bg="black")
-        self.label.place(y=10, x=25)
-        # combobox
-        self.account_name_combobox = ttk.Combobox(self.root)
-        self.account_name_combobox['values'] = [m for m in self.name_list]
-        self.account_name_combobox['state'] = 'readonly'
-        self.account_name_combobox.place(y=10, x=305)
-        # entry
-        self.account_name_entry = tk.Entry(self.root, width=61, bg='#5E615E', fg='black')
-        self.ID_entry = tk.Entry(self.root, width=61, bg='#5E615E', fg='black')
-        self.password_entry = tk.Entry(self.root, width=61, bg='#5E615E', fg='black')
-        # button
-        self.button_confirmation = tk.Button(self.root, height=1, width=35, text="confirm account", bg="#5E615E",
-                                             fg="white", command=self.try_edit_account)
-        # alert
-        self.alert_widget = tk.Label(self.root, fg="white", bg="black")
-        self.alert(y=35)
+    def build(self):
+        settingsButton = QAction()
+        settingsButton.setShortcut('Ctrl+Q')
+        settingsButton.triggered.connect(self.quit)
 
-    def alert(self, text="", y=175):
-        self.alert_widget.config(text=text)
-        self.alert_widget.place(y=y, x=self.root.winfo_width() / 2 - (len(self.alert_widget.cget('text') * 3)))
+        ### différentes polices:
+        self.fontLabel = QFont('Arial Nova Light', 12)
+        self.fontEntry = QFont('Arial Nova Light', 10)
+        self.fontError = QFont('Arial Nova Light', 8)
+        ### window
+        ## give an icon to the window
+        self.setWindowIcon(QIcon('resources/password_icon.ico'))
+        ## set a fix size to the window
+        self.setFixedSize(700, 500)
+        ## background
+        self.background = QFrame(self)
+        self.background.setFixedSize(self.width(), self.height())
+        self.background.move(0, 0)
 
-    def update_widget(self, event=None):
-        self.account_name = self.account_name_combobox.get()
-        if self.account_name == "main_password":
-            # pack_forget
-            self.account_name_entry.place_forget()
-            self.ID_entry.place_forget()
-            self.password_entry.place_forget()
-            self.button_confirmation.place_forget()
-            # pack
-            self.label.place(y=10, x=60)
-            self.account_name_combobox.place(y=10, x=280)
-            self.password_entry.place(y=55, x=self.root.winfo_width() / 2 - self.password_entry.cget('width') * 3)
-            self.button_confirmation.place(y=85, x=self.root.winfo_width() / 2 - self.button_confirmation.cget(
-                'width') * 3 - len(self.button_confirmation.cget('text')))
-            self.alert(text="", y=115)
-            # modif
-            self.ID_entry.insert(0, "default")
-            self.account_name_entry.insert(0, "default")
-            self.label.config(text="You change the settings of the account :")
-            self.password_entry.delete(0, tk.END)
-            self.password_entry.insert(0, "Enter your new main password")
-            self.root.bind('<Return>', self.try_edit_account)
-        else:
-            # pack_forget
-            self.alert_widget.pack_forget()
-            # pack
-            self.label.place(y=10, x=60)
-            self.account_name_combobox.place(y=10, x=280)
-            self.account_name_entry.place(y=55,
-                                          x=self.root.winfo_width() / 2 - self.account_name_entry.cget('width') * 3)
-            self.ID_entry.place(y=85, x=self.root.winfo_width() / 2 - self.ID_entry.cget('width') * 3)
-            self.password_entry.place(y=115, x=self.root.winfo_width() / 2 - self.password_entry.cget('width') * 3)
-            self.button_confirmation.place(y=145, x=self.root.winfo_width() / 2 - self.button_confirmation.cget(
-                'width') * 3 - len(self.button_confirmation.cget('text')))
-            self.alert(text="", y=175)
-            # modif
-            self.ID_entry.delete(0, tk.END)
-            self.account_name_entry.delete(0, tk.END)
-            self.label.config(text="You change the settings of the account :")
-            self.account_name_entry.delete(0, tk.END)
-            self.account_name_entry.insert(0, self.account_name)
-            self.ID_entry.delete(0, tk.END)
-            self.ID_entry.insert(0, self.software_to_id[self.account_name])
-            self.password_entry.delete(0, tk.END)
-            self.password_entry.insert(0, self.software_to_password[self.account_name])
-            self.root.bind('<Return>', self.try_edit_account)
+        ### New account name
+        ## new_accName_label
+        self.new_accName_label = QLabel(self)
+        self.new_accName_label.setFont(self.fontLabel)
+        self.new_accName_label.move(10, 10)
+        ## QLineEdit Name
+        self.new_accName = QLineEdit(self)
+        self.new_accName.setFont(self.fontEntry)
+        self.new_accName.resize(350, self.new_accName.height())
+        self.new_accName.move(self.new_accName_label.geometry().x(), self.new_accName_label.geometry().y() + 30)
+        self.new_accName.insert(self.accName)
+        ## new_accNameError
+        self.new_accNameError = QLabel(self)
+        self.new_accNameError.setFont(self.fontError)
+        self.new_accNameError.setFixedWidth(300)
+        self.new_accNameError.move(self.new_accName_label.geometry().x(), self.new_accName.geometry().y() + 32)
 
-    def try_edit_account(self, event=None):
-        account_name_ = self.account_name_entry.get().replace(" ", "").lower()
-        account_ID_ = self.ID_entry.get().replace(" ", "")
-        account_password_ = self.password_entry.get().replace(" ", "")
-        # check if there has been a change
-        if account_name_ != self.account_name or account_ID_ != self.software_to_id[self.account_name] or account_password_ != self.software_to_password[self.account_name]:
-            # Ask if the user really wants to save the changes
-            if not messagebox.askokcancel("", f"Do you really want to change the {self.account_name} account?"):
-                if self.account_name == "main_password":
-                    self.alert(text="Modification interrupted", y=115)
-                else:
-                    self.alert(text="Modification interrupted")
-            else:
-                # To know if one of the characters used cannot be encrypted
+        ### New account alias
+        ## new_accAlias_label
+        self.new_accAlias_label = QLabel(self)
+        self.new_accAlias_label.setFont(self.fontLabel)
+        self.new_accAlias_label.move(self.new_accName_label.geometry().x(), self.new_accNameError.geometry().y() + 20)
+        ## QLineEdit Alias
+        self.new_accAlias = QLineEdit(self)
+        self.new_accAlias.setFont(self.fontEntry)
+        self.new_accAlias.resize(350, self.new_accAlias.height())
+        self.new_accAlias.move(self.new_accAlias_label.geometry().x(), self.new_accAlias_label.geometry().y() + 30)
+        self.new_accAlias.insert("".join(self.accAlias))
+        ## new_accAliasError
+        self.new_accAliasError = QLabel(self)
+        self.new_accAliasError.setFont(self.fontError)
+        self.new_accAliasError.setFixedWidth(300)
+        self.new_accAliasError.move(self.new_accAlias_label.geometry().x(), self.new_accAlias.geometry().y() + 32)
+
+        ### New account id
+        ## new_accID_label
+        self.new_accID_label = QLabel(self)
+        self.new_accID_label.setFont(self.fontLabel)
+        self.new_accID_label.move(self.new_accName_label.geometry().x(), self.new_accAliasError.geometry().y() + 20)
+        ## QLineEdit ID
+        self.new_accID = QLineEdit(self)
+        self.new_accID.setFont(self.fontEntry)
+        self.new_accID.resize(350, self.new_accID.height())
+        self.new_accID.move(self.new_accID_label.geometry().x(), self.new_accID_label.geometry().y() + 30)
+        self.new_accID.insert(self.accID)
+        ## new_accIDError
+        self.new_accIDError = QLabel(self)
+        self.new_accIDError.setFont(self.fontError)
+        self.new_accIDError.setFixedWidth(300)
+        self.new_accIDError.move(self.new_accID_label.geometry().x(), self.new_accID.geometry().y() + 32)
+
+        ### New account email
+        ## new_accEmail_label
+        self.new_accEmail_label = QLabel(self)
+        self.new_accEmail_label.setFont(self.fontLabel)
+        self.new_accEmail_label.move(self.new_accName_label.geometry().x(), self.new_accIDError.geometry().y() + 20)
+        ## QLineEdit Email
+        self.new_accEmail = QLineEdit(self)
+        self.new_accEmail.setFont(self.fontEntry)
+        self.new_accEmail.resize(350, self.new_accEmail.height())
+        self.new_accEmail.move(self.new_accEmail_label.geometry().x(), self.new_accEmail_label.geometry().y() + 30)
+        self.new_accEmail.insert(self.accEmail)
+        ## new_accEmailError
+        self.new_accEmailError = QLabel(self)
+        self.new_accEmailError.setFont(self.fontError)
+        self.new_accEmailError.setFixedWidth(300)
+        self.new_accEmailError.move(self.new_accEmail_label.geometry().x(), self.new_accEmail.geometry().y() + 32)
+
+        ### New account password
+        ## new_accPassword_label
+        self.new_accPassword_label = QLabel(self)
+        self.new_accPassword_label.setFont(self.fontLabel)
+        self.new_accPassword_label.move(self.new_accName_label.geometry().x(), self.new_accEmailError.geometry().y() + 20)
+        ## QLineEdit password
+        self.new_accPassword = QLineEdit(self)
+        self.new_accPassword.setFont(self.fontEntry)
+        self.new_accPassword.resize(350, self.new_accPassword.height())
+        self.new_accPassword.move(self.new_accPassword_label.geometry().x(), self.new_accPassword_label.geometry().y() + 30)
+        self.new_accPassword.insert(self.accPassword)
+        ## new_accPasswordError
+        self.new_accPasswordError = QLabel(self)
+        self.new_accPasswordError.setFont(self.fontError)
+        self.new_accPasswordError.setFixedWidth(300)
+        self.new_accPasswordError.move(self.new_accPassword_label.geometry().x(),
+                                       self.new_accPassword.geometry().y() + 32)
+        # see / not to see
+        self.new_accPassword.setEchoMode(QLineEdit.Password)
+        self.password_isVisible = False
+        self.is_visible = QPushButton(self.new_accPassword)
+        self.is_visible.setCursor(Qt.ArrowCursor)
+        if self.main_self.theme == 'dark':
+            self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+        elif self.main_self.theme == 'bright':
+            self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
+        self.is_visible.setStyleSheet('border: 0px;')
+        self.is_visible.clicked.connect(self.visible)
+        self.is_visible.move(self.new_accPassword.width() - 30, 5)
+        ## generate password
+        self.generatePassword_Button = QPushButton(self)
+        self.generatePassword_Button.setFont(QFont('Arial Nova Light', 10))
+        self.generatePassword_Button.clicked.connect(self.generatePassword)
+        self.generatePassword_Button.move(self.new_accPassword_label.geometry().x(), self.new_accPasswordError.geometry().y() + 20)
+
+        ### translate
+        self.translate(self.main_self.language)
+
+        ### setTheme
+        self.setTheme(self.main_self.theme)
+
+        ### display window
+        self.show()
+
+    def try_save_accountInformations(self):
+        new_accList = [self.new_accName, self.new_accAlias, self.new_accID, self.new_accEmail, self.new_accPassword]
+        new_accErrorList = [self.new_accNameError, self.new_accAliasError, self.new_accIDError, self.new_accEmailError,
+                            self.new_accPasswordError]
+
+        ### reset the correct StyleSheet on all entries
+        if self.main_self.theme == "dark":
+            for i in new_accList:
+                i.setStyleSheet(
+                    f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
+
+        elif self.main_self.theme == "bright":
+            for i in new_accList:
+                i.setStyleSheet(
+                    f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
+
+        ### reset error messages
+        for i in new_accErrorList:
+            i.setText('')
+
+        ### retrieve keystrokes and put them in variables
+        new_name = self.new_accName.text().replace(' ', '')
+        new_alias = self.new_accAlias.text().replace(' ', '')
+        new_id = self.new_accID.text().replace(' ', '')
+        new_email = self.new_accEmail.text().replace(' ', '')
+        new_password = self.new_accPassword.text().replace(' ', '')
+
+        new_List = [new_name, new_alias, new_id, new_email, new_password]
+        List = [self.accName, self.accAlias, self.accID, self.accEmail, self.accPassword]
+        run = False
+        for i in range(len(new_List)):
+            if new_List[i] != List[i]:
                 run = True
-                for i in account_name_ + account_ID_ + account_password_:
-                    if not i in alpha:
-                        run = False
-                if not run:
-                    char = ""
-                    for i in account_name_ + account_ID_ + account_password_:
-                        if not i in alpha:
-                            char += i
-                    self.alert(text=f"You cannot use the following characters: {char}")
-                else:
-                    # Call up the account modification function
-                    self.edit_account(account_name_, account_ID_, account_password_)
+
+        if run:
+            ### create error_list that contains all non-encryptable characters and delete duplicates with set()
+            error_list = list(set(i for i in new_name + new_alias + new_id + new_email + new_password if not i in alpha))
+            ### create a list for each QLineEdit
+            new_ErrorList = [[], [], [], [], []]
+
+            if error_list:
+                for i in error_list:
+                    for j in range(len(new_List)):
+                        if i in new_List[j]:
+                            if self.main_self.theme == 'dark':
+                                new_accList[j].setStyleSheet(
+                                    f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+                            elif self.main_self.theme == 'bright':
+                                new_accList[j].setStyleSheet(
+                                    f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+                            new_ErrorList[j].append(i)
+                # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                if self.main_self.language == 'french':
+                    for i in range(len(new_ErrorList)):
+                        if new_ErrorList[i]:
+                            new_accErrorList[i].setText(
+                                f'Vous ne pouvez pas utiliser le{"s" if len(new_ErrorList[i]) > 1 else ""} caractère{"s" if len(new_ErrorList[i]) > 1 else ""}: {"".join(new_ErrorList[i])}!')
+                elif self.main_self.language == 'english':
+                    for i in range(len(new_ErrorList)):
+                        if new_ErrorList[i]:
+                            new_accErrorList[i].setText(
+                                f'You cannot use the character{"s" if len(new_ErrorList[i]) > 1 else ""}: {"".join(new_ErrorList[i])}!')
+            # //////////////////////////////////////////////////////////////////////////////////////////////////////////
+            elif '--' in new_name or '--' in new_alias or '--' in new_id or '--' in new_email or '--' in new_password or \
+                    '::' in new_name or '::' in new_alias or '::' in new_id or '::' in new_email or '::' in new_password or \
+                    '//' in new_name or '//' in new_alias or '//' in new_id or '//' in new_email or '//' in new_password or \
+                    '%%' in new_name or '%%' in new_alias or '%%' in new_id or '%%' in new_email or '%%' in new_password or \
+                    ';;' in new_name or ';;' in new_alias or ';;' in new_id or ';;' in new_email or ';;' in new_password:
+                if self.main_self.language == 'french':
+                    message = "Vous ne pouvez pas utiliser '::', '//', '%%' ni ';;'."
+                elif self.main_self.language == 'english':
+                    message = "You cannot use '::', '//', '%%' or ';;'."
+                # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                for i in range(len(new_List)):
+                    if '--' in new_List[i] or '::' in new_List[i] or '//' in new_List[i] or '%%' in new_List[i] or ';;' in new_List[i]:
+                        if self.main_self.theme == 'dark':
+                            new_accList[i].setStyleSheet(
+                                f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+                            new_accErrorList[i].setText(message)
+                        elif self.main_self.theme == 'bright':
+                            new_accList[i].setStyleSheet(
+                                f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+                            new_accErrorList[i].setText(message)
+            # //////////////////////////////////////////////////////////////////////////////////////////////////////////
+            elif new_name == '' or new_password == '':
+                if not new_name:
+                    if self.main_self.theme == 'dark':
+                        self.new_accName.setStyleSheet(
+                            f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+                    elif self.main_self.theme == 'bright':
+                        self.new_accName.setStyleSheet(
+                            f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+                    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                    if self.main_self.language == 'french':
+                        self.new_accNameError.setText('Ce champ de texte est obligatoire')
+                    elif self.main_self.language == 'english':
+                        self.new_accNameError.setText('This text field is mandatory')
+                # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                if not new_password:
+                    if self.main_self.theme == 'dark':
+                        self.new_accPassword.setStyleSheet(
+                            f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+                    elif self.main_self.theme == 'bright':
+                        self.new_accPassword.setStyleSheet(
+                            f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+                    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                    if self.main_self.language == 'french':
+                        self.new_accPasswordError.setText('Ce champ de texte est obligatoire')
+                    elif self.main_self.language == 'english':
+                        self.new_accPasswordError.setText('This text field is mandatory')
+            # //////////////////////////////////////////////////////////////////////////////////////////////////////////
+            elif new_name in [i for i in self.main_self.name_list if i != self.accName]:
+                if self.main_self.theme == 'dark':
+                    self.new_accName.setStyleSheet(
+                        f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+                elif self.main_self.theme == 'bright':
+                    self.new_accName.setStyleSheet(
+                        f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+                # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                if self.main_self.language == 'french':
+                    self.new_accNameError.setText('Le nom est déjà pris...')
+                elif self.main_self.language == 'english':
+                    self.new_accNameError.setText('The name is already taken...')
+            # //////////////////////////////////////////////////////////////////////////////////////////////////////////
+            elif "".join(new_alias) in self.main_self.name_list or new_alias == [new_name]:
+                if self.main_self.theme == 'dark':
+                    self.new_accAlias.setStyleSheet(
+                        f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+                elif self.main_self.theme == 'bright':
+                    self.new_accAlias.setStyleSheet(
+                        f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+                # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                if self.main_self.language == 'french':
+                    self.new_accAliasError.setText('Le nom est déjà pris...')
+                elif self.main_self.language == 'english':
+                    self.new_accAliasError.setText('The name is already taken...')
+            # ##########################################################################################################
+            else:
+                run2 = True
+
+                if new_name != self.accName:
+                    for i in [''.join(i) for i in list(self.main_self.name_to_alias.values())]:
+                        if new_name == i:
+                            run2 = False
+                            if self.main_self.theme == 'dark':
+                                self.new_accName.setStyleSheet(
+                                    f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+                            elif self.main_self.theme == 'bright':
+                                self.new_accName.setStyleSheet(
+                                    f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+                            # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                            if self.main_self.language == 'french':
+                                self.new_accNameError.setText('Le nom est déjà pris...')
+                            elif self.main_self.language == 'english':
+                                self.new_accNameError.setText('The name is already taken...')
+                            break
+                # //////////////////////////////////////////////////////////////////////////////////////////////////////
+                if new_alias != self.accAlias:
+                    for i in list(self.main_self.name_to_alias.values()):
+                        if new_alias == i:
+                            run2 = False
+                            if self.main_self.theme == 'dark':
+                                self.new_accAlias.setStyleSheet(
+                                    f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+                            elif self.main_self.theme == 'bright':
+                                self.new_accAlias.setStyleSheet(
+                                    f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+                            # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                            if self.main_self.language == 'french':
+                                self.new_accAliasError.setText('Le nom est déjà pris...')
+                            elif self.main_self.language == 'english':
+                                self.new_accAliasError.setText('The name is already taken...')
+                            break
+                # //////////////////////////////////////////////////////////////////////////////////////////////////////
+                if new_id != self.accID:
+                    pass
+                # //////////////////////////////////////////////////////////////////////////////////////////////////////
+                if new_email != self.accEmail:
+                    pass
+                # //////////////////////////////////////////////////////////////////////////////////////////////////////
+                if new_password != self.accPassword:
+                    pass
+
+                if run2:
+                    exitMessage = QMessageBox()
+                    exitMessage.setIcon(QMessageBox.Question)
+                    exitMessage.setWindowIcon(QIcon('resources/password_icon.ico'))
+                    if self.main_self.language == 'french':
+                        exitMessage.setWindowTitle('Enregistrer')
+                        exitMessage.setText('Voulez-vous vraiment enregistrer les modifications ?')
+                        exitMessage.addButton("&Oui", QMessageBox.YesRole)
+                        exitMessage.addButton("&Non", QMessageBox.NoRole)
+                    elif self.main_self.language == 'english':
+                        exitMessage.setWindowTitle('Save')
+                        exitMessage.setText('Do you really want to save the changes ?')
+                        exitMessage.addButton("&Yes", QMessageBox.YesRole)
+                        exitMessage.addButton("&No", QMessageBox.NoRole)
+                    exitMessage.exec_()
+                    if exitMessage.clickedButton().text() == '&Yes' or exitMessage.clickedButton().text() == '&Oui':
+                        with open('files/password.txt', 'r') as f:
+                            file = f.readlines()
+                            f.close()
+                        file = [convert_bin_txt(i, self.main_self.seed) for i in file]
+                        for i in range(len(file)):
+                            if file[i] == self.accName + '--' or file[i] == self.accName + '::':
+                                line = i
+                                j = 0
+                                for j in range(i, len(file)):
+                                    if ';;' in file[j]:
+                                        end_line = j + 1
+                                        break
+                        for i in range(line, end_line):
+                            del file[line]
+                        with open('files/password.txt', 'w') as f:
+                            [f.write(convert_txt_bin(i, self.main_self.seed) + '\n') for i in file]
+                            f.close()
+                        with open('files/password.txt', 'a') as f:
+                            if new_alias != ['']:
+                                f.write(convert_txt_bin(new_name + '--', self.main_self.seed) + '\n')
+                                f.write(convert_txt_bin("".join(new_alias) + '::', self.main_self.seed) + '\n')
+                            else:
+                                f.write(convert_txt_bin(new_name + '::', self.main_self.seed) + '\n')
+                            f.write(convert_txt_bin(new_id + '//', self.main_self.seed) + '\n')
+                            f.write(convert_txt_bin(new_email + '%%', self.main_self.seed) + '\n')
+                            f.write(convert_txt_bin(new_password + ';;', self.main_self.seed) + '\n')
+                            f.close()
+
+                        self.main_self.row_to_name[new_name] = self.main_self.row_to_name[self.main_self.name_to_row[self.accName]]
+                        del self.main_self.row_to_name[self.main_self.name_to_row[self.accName]]
+                        self.main_self.name_to_row[new_name] = self.main_self.name_to_row[self.accName]
+                        del self.main_self.name_to_row[self.accName]
+
+                        self.main_self.name_list.remove(self.accName)
+                        del self.main_self.name_to_alias[self.accName]
+                        del self.main_self.name_to_ID[self.accName]
+                        del self.main_self.name_to_email[self.accName]
+                        del self.main_self.name_to_password[self.accName]
+
+                        self.main_self.name_list.append(new_name)
+                        self.main_self.name_to_alias[new_name] = new_alias
+                        self.main_self.name_to_ID[new_name] = new_id
+                        self.main_self.name_to_email[new_name] = new_email
+                        self.main_self.name_to_password[new_name] = new_password
+
+                        ### update
+                        self.main_self.data_in_table(self.main_self)
+                        self.main_self.search()
+            # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         else:
-            if self.account_name == "main_password":
-                self.alert(text="You have not made any changes", y=115)
-            else:
-                self.alert(text="You have not made any changes")
+            pass
 
-    def edit_account(self, account_name_, account_ID_, account_password_):
-        # If account_name_ is different from the registered version
-        if account_name_ != self.account_name:
-            if account_name_ == "":
-                self.alert(text="You have not written anything !")
-            else:
-                if self.account_name == "main_password":
-                    self.alert(text="The name is already taken!")
-                else:
-                    # test if the name is already taken
-                    if account_name_ in self.name_list or account_name_ in self.default_name_list:
-                        if account_name_ in self.name_list:
-                            self.alert("This name is already taken!")
-                        if account_name_ in self.default_name_list:
-                            self.alert("You cannot use the name of a command !")
-                    else:
-                        self.edit_name_account(account_name_)
-        # If account_ID_ is different from the registered version
-        if account_ID_ != self.software_to_id[self.account_name]:
-            if account_name_ == "":
-                self.alert(text="You have not written anything !")
-            else:
-                self.edit_ID_account(account_ID_)
-        # If account_password_ is different from the registered version
-        if account_password_ != self.software_to_password[self.account_name]:
-            if account_name_ == "":
-                self.alert(text="You have not written anything !")
-            else:
-                if self.account_name == "main_password":
-                    if account_password_ == "Enteryournewmainpassword":
-                        print(account_password_)
-                        self.alert(text="You have not changed any information", y=115)
-                    else:
-                        self.edit_main_password(account_password_)
-                else:
-                    self.edit_password_account(account_password_)
+    def generatePassword(self):
+        characters = list(alpha)
+        random.seed()
+        random.shuffle(characters)
+        password_ = ""
+        for i in range(30):
+            var = random.choice(characters)
+            password_ = password_ + var
+        if '--' in password_ or '::' in password_ or '//' in password_ or '%%' in password_ or ';;' in password_:
+            random.shuffle(characters)
+            password_ = ""
+            for i in range(30):
+                var = random.choice(characters)
+                password_ = password_ + var
+        self.new_accPassword.clear()
+        self.new_accPassword.insert(password_)
 
-    def edit_name_account(self, new_website):
-        # change of name
-        with open("password.txt", "r") as file:
-            liste = list(file)
-            file.close()
-        for i in range(len(liste)):
-            liste[i] = convert_bin_txt(liste[i])
-            if liste[i].replace("::", "").replace("\n", "").lstrip().rstrip() == self.account_name:
-                line = i
-        # delete the website or software name, ID and password
-        liste[line] = new_website + "::"
-        # rewrite the password.txt from list contents/elements:
-        with open("password.txt", "w") as file:
-            for n in liste:
-                file.write(convert_txt_bin(n) + "\n")
-            file.close()
-        # insert the new account name in the entry
-        self.account_name_entry.delete(0, tk.END)
-        self.account_name_entry.insert(0, new_website)
-        # change the account name in name_list
-        del self.name_list[self.account_name]
-        self.name_list[new_website] = None
-        # change the account name in software_to_id
-        self.software_to_id[new_website] = self.software_to_id[self.account_name]
-        del self.software_to_id[self.account_name]
-        # change the account name in software_to_password
-        self.software_to_password[new_website] = self.software_to_password[self.account_name]
-        del self.software_to_password[self.account_name]
-        # give the account its new name
-        self.account_name = new_website
-        # change the account name in combobox
-        self.account_name_combobox['values'] = [m for m in self.name_list]
-        # say that the change is made
-        self.alert(text="Editing done")
+    def setTheme(self, theme):
+        if theme == 'dark':
+            self.background.setStyleSheet(f'background: #{dark_background};')
+            ### account name
+            self.new_accName_label.setStyleSheet(f'color: #{dark_color}')
+            self.new_accName.setStyleSheet(
+                f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
+            self.new_accNameError.setStyleSheet(f'color: #{dark_alert}')
+            ### account alias
+            self.new_accAlias_label.setStyleSheet(f'color: #{dark_color}')
+            self.new_accAlias.setStyleSheet(
+                f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
+            self.new_accAliasError.setStyleSheet(f'color: #{dark_alert}')
+            ### account id
+            self.new_accID_label.setStyleSheet(f'color: #{dark_color}')
+            self.new_accID.setStyleSheet(
+                f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
+            self.new_accIDError.setStyleSheet(f'color: #{dark_alert}')
+            ### account email
+            self.new_accEmail_label.setStyleSheet(f'color: #{dark_color}')
+            self.new_accEmail.setStyleSheet(
+                f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
+            self.new_accEmailError.setStyleSheet(f'color: #{dark_alert}')
+            ### account password
+            self.new_accPassword_label.setStyleSheet(f'color: #{dark_color}')
+            self.new_accPassword.setStyleSheet(
+                f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
+            self.new_accPasswordError.setStyleSheet(f'color: #{dark_alert}')
+            ### generate password button
+            self.generatePassword_Button.setStyleSheet(
+                f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_border}; border-radius: 2px;')
 
-    def edit_ID_account(self, new_ID):
-        with open("password.txt", "r") as file:
-            liste = list(file)
-            file.close()
-        for i in range(len(liste)):
-            liste[i] = convert_bin_txt(liste[i])
-            if liste[i].replace("::", "").replace("\n", "").lstrip().rstrip() == self.account_name:
-                line = i + 1
-        # delete the website or software name, ID and password
-        liste[line] = new_ID + "//"
-        # rewrite the password.txt from list contents/elements:
-        with open("password.txt", "w") as file:
-            for n in liste:
-                file.write(convert_txt_bin(n) + "\n")
-            file.close()
-        self.ID_entry.delete(0, tk.END)
-        self.ID_entry.insert(0, new_ID)
-        self.software_to_id[self.account_name] = new_ID
-        self.alert(text="Editing done")
+        elif theme == 'bright':
+            self.background.setStyleSheet(f'background: #{bright_background};')
+            ### account name
+            self.new_accName.setStyleSheet(
+                f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
+            self.new_accNameError.setStyleSheet(f'color: #{bright_alert}')
+            ### account alias
+            self.new_accAlias.setStyleSheet(
+                f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
+            self.new_accAliasError.setStyleSheet(f'color: #{bright_alert}')
+            ### account id
+            self.new_accID.setStyleSheet(
+                f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
+            self.new_accIDError.setStyleSheet(f'color: #{bright_alert}')
+            ### account email
+            self.new_accEmail.setStyleSheet(
+                f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
+            self.new_accEmailError.setStyleSheet(f'color: #{bright_alert}')
+            ### account password
+            self.new_accPassword.setStyleSheet(
+                f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
+            self.new_accPasswordError.setStyleSheet(f'color: #{bright_alert}')
+            ### generate password button
+            self.generatePassword_Button.setStyleSheet(
+                f'background: #{bright_background}; border: 1px solid #{bright_border}; border-radius: 2px;')
 
-    def edit_password_account(self, new_password):
-        with open("password.txt", "r") as file:
-            liste = list(file)
-            file.close()
-        for i in range(len(liste)):
-            liste[i] = convert_bin_txt(liste[i])
-            if liste[i].replace("::", "").replace('\n', '').lstrip().rstrip() == self.account_name:
-                line = i + 2
-        # delete the website or software name, ID and password
-        liste[line] = new_password + ";;"
-        # rewrite the password.txt from list contents/elements:
-        with open("password.txt", "w") as file:
-            for n in liste:
-                file.write(convert_txt_bin(n) + '\n')
-            file.close()
-        self.password_entry.delete(0, tk.END)
-        self.password_entry.insert(0, new_password)
-        self.software_to_password[self.account_name] = new_password
-        self.alert(text="Editing done")
+    def translate(self, language):
+        if language == 'french':
+            self.setWindowTitle('Modifier le compte')
+            self.new_accName_label.setText('Nom du compte:')
+            self.new_accAlias_label.setText('Alias (facultatif):')
+            self.new_accID_label.setText('Identifiant (facultatif):')
+            self.new_accEmail_label.setText('Email (facultatif):')
+            self.new_accPassword_label.setText('Mot de passe:')
+            self.generatePassword_Button.setText('Générer un mot de passe')
+            self.generatePassword_Button.setFixedSize(195, 25)
 
-    def edit_main_password(self, new_password):
-        new_password = new_password.encode()
-        new_password = hashlib.sha512(new_password).hexdigest()
-        with open("password.txt", "r") as file:
-            liste = list(file)
-            file.close()
-        for i in range(len(liste)):
-            liste[i] = convert_bin_txt(liste[i])
-            if liste[i].replace("::", "").replace('\n', '').lstrip().rstrip() == self.account_name:
-                line = i + 2
-        # delete the website or software name, ID and password
-        liste[line] = new_password + ";;"
-        # rewrite the password.txt from list contents/elements:
-        with open("password.txt", "w") as file:
-            for n in liste:
-                file.write(convert_txt_bin(n) + '\n')
-            file.close()
-        self.alert(text="Editing done", y=115)
+        elif language == 'english':
+            self.setWindowTitle('Edit the account')
+            self.new_accName_label.setText('Account name:')
+            self.new_accAlias_label.setText('Alias (optional):')
+            self.new_accID_label.setText('Identifier (optional):')
+            self.new_accEmail_label.setText('Email (optional):')
+            self.new_accPassword_label.setText('Password:')
+            self.generatePassword_Button.setText('Generate a password')
+            self.generatePassword_Button.setFixedSize(165, 25)
 
-    def quit_window(self):
-        self.root.quit()
+    def visible(self):
+        if not self.password_isVisible:
+            self.new_accPassword.setEchoMode(QLineEdit.Normal)
+            if self.main_self.theme == 'dark':
+                self.is_visible.setIcon(QIcon('resources/dark_close_eye.png'))
+            elif self.main_self.theme == 'bright':
+                self.is_visible.setIcon(QIcon('resources/close_eye.svg'))
+            self.password_isVisible = True
+        else:
+            self.new_accPassword.setEchoMode(QLineEdit.Password)
+            if self.main_self.theme == 'dark':
+                self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+            elif self.main_self.theme == 'bright':
+                self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
+            self.password_isVisible = False
+
+    def keyPressEvent(self, event):
+        if event.modifiers() & Qt.ControlModifier:
+            if event.key() == Qt.Key_Q:
+                self.quit()
+            if event.key() == Qt.Key_S:
+                self.try_save_accountInformations()
+        if event.key() == Qt.Key_Return:
+            self.try_save_accountInformations()
+
+    def quit(self):
+        if self.new_accName.text().replace(' ', '') != self.accName or self.new_accAlias.text().replace(' ', '') != "".join(self.accAlias) or \
+                self.new_accID.text().replace(' ', '') != self.accID or self.new_accEmail.text().replace(' ', '') != self.accEmail or \
+                self.new_accPassword.text().replace(' ', '') != self.accPassword:
+            exitMessage = QMessageBox()
+            exitMessage.setIcon(QMessageBox.Question)
+            exitMessage.setWindowIcon(QIcon('resources/password_icon.ico'))
+            if self.main_self.language == 'french':
+                exitMessage.setWindowTitle('Quitter')
+                exitMessage.setText('Voulez-vous vraiment fermer la fenêtre ?')
+                exitMessage.addButton("&Oui", QMessageBox.YesRole)
+                exitMessage.addButton("&Non", QMessageBox.NoRole)
+            elif self.main_self.language == 'english':
+                exitMessage.setWindowTitle('Exit')
+                exitMessage.setText('Do you really want to close the window ?')
+                exitMessage.addButton("&Yes", QMessageBox.YesRole)
+                exitMessage.addButton("&No", QMessageBox.NoRole)
+            exitMessage.exec_()
+            if exitMessage.clickedButton().text() == '&Yes' or exitMessage.clickedButton().text() == '&Oui':
+                self.close()
+        else:
+            self.close()

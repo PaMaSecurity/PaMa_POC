@@ -1,5 +1,5 @@
 # imports:
-from imports import tk, messagebox, random, convert_txt_bin
+from imports import tk, messagebox, random, convert_txt_bin, alpha
 
 
 class Add_account(tk.Frame):
@@ -59,24 +59,35 @@ class Add_account(tk.Frame):
         website_ = self.website.get().replace(" ", "").lower()
         id_ = self.ID.get()
         password_ = self.password.get().replace(" ", "")
-        if website_ == "":
-            self.alert.config(text="Please enter the name of the website or software")
-        elif website_ in self.name_list:
-            self.alert.config(text="The name is already taken!")
-        elif website_ in self.default_name_list:
-            self.alert.config(text="The name is already taken by a command")
+        run = True
+        for i in website_ + id_ + password_:
+            if not i in alpha:
+                run = False
+        if not run:
+            char = ""
+            for i in website_ + id_ + password_:
+                if not i in alpha:
+                    char += i
+            self.alert.config(text=f"You cannot use the following characters: {char}")
         else:
-            try:
-                x = self.name_list[website_]
-                del x
-                self.alert.config(text="The website or software account is already registered")
-            except:
-                if password_ == "":
-                    self.alert.config(text="Please enter your password")
-                elif password_ != password_.replace(";;", "") or password_ != password_.replace("::", "") or password_ != password_.replace("//", ""):
-                    self.alert.config(text="The password must not contain ';;' , '::' and '//'")
-                else:
-                    self.add_account(website_, id_, password_)
+            if website_ == "":
+                self.alert.config(text="Please enter the name of the website or software")
+            elif website_ in self.name_list:
+                self.alert.config(text="The name is already taken!")
+            elif website_ in self.default_name_list:
+                self.alert.config(text="The name is already taken by a command")
+            else:
+                try:
+                    x = self.name_list[website_]
+                    del x
+                    self.alert.config(text="The website or software account is already registered")
+                except:
+                    if password_ == "":
+                        self.alert.config(text="Please enter your password")
+                    elif password_ != password_.replace(";;", "") or password_ != password_.replace("::", "") or password_ != password_.replace("//", ""):
+                        self.alert.config(text="The password must not contain ';;' , '::' and '//'")
+                    else:
+                        self.add_account(website_, id_, password_)
 
     def add_account(self, website_, id_, password_):
         with open("password.txt", "a+") as file:

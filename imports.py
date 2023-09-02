@@ -3,7 +3,7 @@ try:
     import tkinter as tk
     from tkinter import messagebox
     import tkinter.ttk as ttk
-    from convert import convert_txt_bin, convert_bin_txt
+    from convert import convert_txt_bin, convert_bin_txt, alpha, create_seed
     import random
 except:
     try:

@@ -1,10 +1,10 @@
 # imports:
-from imports import tk, ttk, messagebox, convert_bin_txt, convert_txt_bin, hashlib
+from imports import tk, ttk, messagebox, convert_bin_txt, convert_txt_bin, hashlib, alpha
 
 
 class Edit_account(tk.Frame):
     def __init__(self, master=None, name_list=None, software_to_id=None, software_to_password=None,
-                 default_name_list=None):
+                 default_name_list=None, seed=None):
         super().__init__(master)
         self.root = master
         self.name_list = name_list
@@ -16,6 +16,7 @@ class Edit_account(tk.Frame):
         self.root.resizable(height=False, width=False)
         self.root.config(bg='black')
         self.create_widget()
+        self.seed = seed
         self.account_name_combobox.bind('<<ComboboxSelected>>', self.update_widget)
 
     def create_widget(self):
@@ -38,7 +39,7 @@ class Edit_account(tk.Frame):
         self.password_entry = tk.Entry(self.root, width=61, bg='#5E615E', fg='black')
         # button
         self.button_confirmation = tk.Button(self.root, height=1, width=35, text="confirm account", bg="#5E615E",
-                                             fg="white", command=self.edit_account)
+                                             fg="white", command=self.try_edit_account)
         # alert
         self.alert_widget = tk.Label(self.root, fg="white", bg="black")
         self.alert(y=35)
@@ -68,7 +69,7 @@ class Edit_account(tk.Frame):
             self.label.config(text="You change the settings of the account :")
             self.password_entry.delete(0, tk.END)
             self.password_entry.insert(0, "Enter your new main password")
-            self.root.bind('<Return>', self.edit_account)
+            self.root.bind('<Return>', self.try_edit_account)
         else:
             # pack_forget
             self.alert_widget.pack_forget()
@@ -92,17 +93,49 @@ class Edit_account(tk.Frame):
             self.ID_entry.insert(0, self.software_to_id[self.account_name])
             self.password_entry.delete(0, tk.END)
             self.password_entry.insert(0, self.software_to_password[self.account_name])
-            self.root.bind('<Return>', self.edit_account)
+            self.root.bind('<Return>', self.try_edit_account)
 
-    def edit_account(self, event=None):
+    def try_edit_account(self, event=None):
         account_name_ = self.account_name_entry.get().replace(" ", "").lower()
         account_ID_ = self.ID_entry.get().replace(" ", "")
         account_password_ = self.password_entry.get().replace(" ", "")
-        if account_name_ != self.account_name or account_ID_ != self.software_to_id[self.account_name] or account_password_ != self.software_to_password[self.account_name]:
-            # if messagebox.askokcancel("", f"Do you really want to change the {self.account_name} account?"):
-            if account_name_ != self.account_name and self.account_name != "main_password":
-                if account_name_ == "":
-                    self.alert(text="You have not written anything !")
+        # check if there has been a change
+        if not account_name_ != self.account_name or account_ID_ != self.software_to_id[self.account_name] or account_password_ != self.software_to_password[self.account_name]:
+            if self.account_name == "main_password":
+                self.alert(text="You have not made any changes", y=115)
+            else:
+                self.alert(text="You have not made any changes")
+        else:
+            # Ask if the user really wants to save the changes
+            if not messagebox.askokcancel("", f"Do you really want to change the {self.account_name} account?"):
+                if self.account_name == "main_password":
+                    self.alert(text="Modification interrupted", y=115)
+                else:
+                    self.alert(text="Modification interrupted")
+            else:
+                # To know if one of the characters used cannot be encrypted
+                run = True
+                for i in account_name_ + account_ID_ + account_password_:
+                    if not i in alpha:
+                        run = False
+                if not run:
+                    char = ""
+                    for i in account_name_ + account_ID_ + account_password_:
+                        if not i in alpha:
+                            char += i
+                    self.alert(text=f"You cannot use the following characters: {char}")
+                else:
+                    # Call up the account modification function
+                    self.edit_account(account_name_, account_ID_, account_password_)
+
+    def edit_account(self, account_name_, account_ID_, account_password_):
+        # If account_name_ is different from the registered version
+        if account_name_ != self.account_name:
+            if account_name_ == "":
+                self.alert(text="You have not written anything !")
+            else:
+                if self.account_name == "main_password":
+                    self.alert(text="The name is already taken!")
                 else:
                     # test if the name is already taken
                     if account_name_ in self.name_list or account_name_ in self.default_name_list:
@@ -112,27 +145,24 @@ class Edit_account(tk.Frame):
                             self.alert("You cannot use the name of a command !")
                     else:
                         self.edit_name_account(account_name_)
-            if account_ID_ != self.software_to_id[self.account_name]:
-                if account_name_ == "":
-                    self.alert(text="You have not written anything !")
-                else:
-                    self.edit_ID_account(account_ID_)
-            if account_password_ != self.software_to_password[self.account_name]:
-                if account_name_ == "":
-                    self.alert(text="You have not written anything !")
-                else:
-                    if self.account_name == "main_password":
-                        if account_password_ == "Enteryournewmainpassword":
-                            self.alert(text="You have not changed any information", y=115)
-                        else:
-                            self.edit_main_password(account_password_)
-                    else:
-                        self.edit_password_account(account_password_)
-        else:
-            if self.account_name == "main_password":
-                self.alert(text="You have not made any changes", y=115)
+        # If account_ID_ is different from the registered version
+        if account_ID_ != self.software_to_id[self.account_name]:
+            if account_name_ == "":
+                self.alert(text="You have not written anything !")
             else:
-                self.alert(text="You have not made any changes")
+                self.edit_ID_account(account_ID_)
+        # If account_password_ is different from the registered version
+        if account_password_ != self.software_to_password[self.account_name]:
+            if account_name_ == "":
+                self.alert(text="You have not written anything !")
+            else:
+                if self.account_name == "main_password":
+                    if account_password_ == "Enteryournewmainpassword":
+                        self.alert(text="You have not changed any information", y=115)
+                    else:
+                        self.edit_main_password(account_password_)
+                else:
+                    self.edit_password_account(account_password_)
 
     def edit_name_account(self, new_website):
         # change of name

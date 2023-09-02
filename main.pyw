@@ -1,5 +1,5 @@
 # imports:
-from imports import tk, messagebox, hashlib, convert_txt_bin, convert_bin_txt
+from imports import tk, messagebox, hashlib, convert_txt_bin, convert_bin_txt, create_seed
 from functions import App
 
 
@@ -36,12 +36,7 @@ class Main(tk.Frame):
             self.label_1.pack_forget()
             self.entry_1.pack_forget()
             self.button_1.pack_forget()
-            """password = list(convert_txt_bin(text=password))
-            del password[1]
-            seed = 0
-            for i in range(len(password)):
-                seed += int(password[i])"""
-            self.root = App(master=self.root)
+            self.root = App(master=self.root, seed=create_seed(self.entry_1.get()))
             self.root.destroy()
         else:
             self.root.destroy()

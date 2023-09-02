@@ -22,7 +22,7 @@ class App(tk.Frame):
         # variables:
         self.seed = seed
         # at the start:
-        self.print_screen("Version 1.2")
+        self.print_screen("Version 1.3")
 
     def create_dico(self):
         self.software_to_id = {}
@@ -33,7 +33,7 @@ class App(tk.Frame):
         self.dico_help = {
             "add": "Add an account",
             "cls": "Clear the screen",
-            "credits": "",
+            "credits": "List and thank all the participants in the creation of this software",
             "delete": "delete an account",
             "edit": "Edit account information",
             "help": "Displays order information",
@@ -131,7 +131,8 @@ class App(tk.Frame):
             self.edit = edit_account.Edit_account(tk.Tk(), name_list=self.name_list,
                                                   software_to_password=self.software_to_password,
                                                   software_to_id=self.software_to_id,
-                                                  default_name_list=self.default_name_list)
+                                                  default_name_list=self.default_name_list,
+                                                  seed=self.seed)
         elif software == "credits":
             self.print_screen(
                 "Creator/Developer: Elie Ruggiero. Many thanks to ZukaBri3k (https://github.com/ZukaBri3k/CommandInvite/blob/main/main.py) for his precious help!")

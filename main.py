@@ -561,7 +561,6 @@ class GetPassword:
         self.passwordEntry.move((self.self.width() - self.passwordEntry.width()) // 2, 150)
         self.passwordEntry.setEchoMode(QLineEdit.Password)
         self.passwordEntry.setStyleSheet(f'border: 1px solid #{bright_border};')
-        self.passwordEntry.insert("PaMa2.3") # retire mot de passe
         self.password_isVisible = False
         ## see / not to see
         self.is_visible = QPushButton(self.passwordEntry)

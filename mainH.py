@@ -9,6 +9,7 @@ try:
     from PyQt5.QtWidgets import QAbstractItemView, QAction, QApplication, QFrame, QHeaderView, QLabel, QLineEdit, \
         QListWidget, QMainWindow, QMenu, QMessageBox, QProgressBar, QPushButton, QSizePolicy, QTableWidget, \
         QTableWidgetItem, QDialog, QShortcut, QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QListWidgetItem
+    from re import search
     from os import popen
     from additions import QPushButtonRight, convert_bin_txt, convert_txt_bin, create_seed, alpha, easy_password, \
         default_folder_name, french, english, dark, bright, dark_color, dark_background, dark_border, \

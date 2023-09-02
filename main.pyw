@@ -82,7 +82,6 @@ class Main(tk.Frame):
 
 
 # program loop
-
 root = tk.Tk()
 root = Main(root)
 root.mainloop()

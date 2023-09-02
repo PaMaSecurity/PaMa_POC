@@ -3,12 +3,13 @@ from imports import tk, messagebox, random, convert_txt_bin
 
 
 class Add_account(tk.Frame):
-    def __init__(self, master=None, name_list=None, software_to_id=None, software_to_password=None):
+    def __init__(self, master=None, name_list=None, software_to_id=None, software_to_password=None, default_name_list=None):
         super().__init__(master)
         self.root = master
         self.name_list = name_list
         self.software_to_id = software_to_id
         self.software_to_password = software_to_password
+        self.default_name_list = default_name_list
         self.root.title("Add a password")
         self.root.geometry('500x600')
         self.root.resizable(height=False, width=False)
@@ -52,6 +53,8 @@ class Add_account(tk.Frame):
         self.root.clipboard_clear()
         self.root.clipboard_append(password_)
         self.root.update()
+        self.password.delete(0, tk.END)
+        self.password.insert(0, password_)
         self.alert.config(text="The password has been generated and copied to the clipboard")
 
     def try_add_account(self, event=None):
@@ -60,6 +63,10 @@ class Add_account(tk.Frame):
         password_ = self.password.get().replace(" ", "")
         if website_ == "":
             self.alert.config(text="Please enter the name of the website or software")
+        elif website_ in self.name_list:
+            self.alert.config(text="The name is already taken!")
+        elif website_ in self.default_name_list:
+            self.alert.config(text="The name is already taken by a command")
         else:
             try:
                 x = self.name_list[website_]

@@ -8,38 +8,28 @@ import edit_account
 class App(tk.Frame):
     def __init__(self, master, seed=None):
         super().__init__(master)
-        # window:
+        # windows:
         self.master = master
         self.root = master
-        self.root.geometry('500x600')
-        self.root.minsize(500, 600)  # 400x500
-        self.root.resizable(height=True, width=True)
-        self.root.config(bg='black')
-        self.root.title("Command invite")
         self.create_widget()
-        self.listbox.pack(side='top', fill='y')
-        self.frame.pack(side='bottom')
-        self.label.pack(side='left', fill='y')
-        self.entry.pack(side='right')
-        self.entry.focus_set()
         # events:
         self.root.bind('<Return>', self.add_listbox)
         self.root.bind('<Configure>', self.resize)
+        # self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         # dictionaries:
         self.create_dico()
         self.read_txt()
         # variables:
         self.seed = seed
         # at the start:
-        self.print_screen("Version 1.0")
+        self.print_screen("Version 1.1")
 
     def create_dico(self):
         self.software_to_id = {}
         self.software_to_password = {}
         self.default_name_list = {"help": None, "namelist": None, "quit": None, "cls": None, "add": None,
                                   "delete": None, "edit": None, "credits": None}
-        self.name_list = {"help": None, "namelist": None, "quit": None, "cls": None, "add": None,
-                          "delete": None, "edit": None, "credits": None}
+        self.name_list = {}
         self.dico_help = {
             "add": "Add an account",
             "cls": "Clear the screen",
@@ -52,6 +42,13 @@ class App(tk.Frame):
         }
 
     def create_widget(self):
+        # main window
+        self.root.geometry('500x600')
+        self.root.minsize(500, 600)  # 400x500
+        self.root.resizable(height=True, width=True)
+        self.root.config(bg='black')
+        self.root.title("Command invite")
+        # other widget
         self.frame = tk.Frame(self.root)
         self.label = tk.Label(self.frame,
                               text='>>>',
@@ -68,81 +65,71 @@ class App(tk.Frame):
                                   bg='black',
                                   fg='#22E427',
                                   highlightthickness=0, font=("arial", 9))
+        # widget.pack()
+        self.listbox.pack(side='top', fill='y')
+        self.frame.pack(side='bottom')
+        self.label.pack(side='left', fill='y')
+        self.entry.pack(side='right')
+        self.entry.focus_set()
 
     def resize(self, event=None):
         x = round(self.root.winfo_width() / 6)
         y = round(self.root.winfo_height() / 16.667)
         z = round(self.root.winfo_height() / 66.6667)
         self.entry.config(width=x)
-        self.listbox.config(width=x,
-                            height=round(y / (z / 9)),
-                            font=("arial", z))
-        self.entry.config(font=("arial", z))
-        self.label.config(font=("arial", z))
+        self.listbox.config(width=x, height=y)
 
     def add_listbox(self, event=None):
         self.print_screen('>>> ' + self.entry.get())
         cmd = self.entry.get()
         self.entry.delete(0, tk.END)
-        cmd = cmd.lower()
-        cmd = cmd.replace(" ", "")
+        cmd = cmd.lower().replace(" ", "")
         try:
-            x = self.name_list[cmd]
-            del x
-            self.order_fulfilment(cmd)
-        except:
-            self.update_name_list()
-            try:
-                x = self.name_list[cmd]
-                del x
+            if cmd in self.name_list or cmd in self.default_name_list and cmd != "main_password":
                 self.order_fulfilment(cmd)
-            except:
-                self.print_screen("Sorry, the account name is not registered in our database...")
-                self.print_screen("Write 'help' to consult the list of commands.")
-
-    def print_screen(self, text):
-        self.listbox.insert('end', text)
+            else:
+                self.update_name_list()
+                if cmd in self.name_list or cmd in self.default_name_list:
+                    self.order_fulfilment(cmd)
+                else:
+                    self.print_screen("Sorry, the account name is not registered in our database...")
+                    self.print_screen("Write 'help' to consult the list of commands.")
+        except:
+            self.print_screen("error")
 
     def order_fulfilment(self, software):
-        if software == "main_password":
-            self.print_screen("Sorry, the account name is not registered in our database...")
-            self.print_screen("Write 'help' to consult the list of commands.")
-        elif software == "help":
+        if software == "help":
             for i in self.dico_help:
                 self.print_screen([i, self.dico_help[i]])
         elif software == "quit":
-            self.root.\
+            self.root. \
                 destroy()
         elif software == "cls":
             self.listbox.delete(0, tk.END)
             self.listbox.insert('end', '>>> ' + "cls")
         elif software == "namelist":
-            for i in self.name_list:
-                if i == "main_password":
-                    pass
-                else:
-                    self.print_screen(i)
-            pass
+            if self.name_list == {"main_password": None}:
+                self.print_screen("No account is registered")
+            else:
+                for i in self.name_list:
+                    if i == "main_password":
+                        pass
+                    else:
+                        self.print_screen(i)
         elif software == "add":
-            root = tk.Tk()
-            root = add_account.Add_account(root, name_list=self.name_list,
-                                           software_to_password=self.software_to_password,
-                                           software_to_id=self.software_to_id)
-            root.mainloop()
+            self.add = add_account.Add_account(tk.Tk(), name_list=self.name_list,
+                                               software_to_password=self.software_to_password,
+                                               software_to_id=self.software_to_id,
+                                               default_name_list=self.default_name_list)
         elif software == "delete":
-            root = tk.Tk()
-            root = delete_account.Delete_account(root, name_list=self.name_list,
-                                                 software_to_password=self.software_to_password,
-                                                 software_to_id=self.software_to_id,
-                                                 default_name_list=self.default_name_list)
-            root.mainloop()
+            self.delete = delete_account.Delete_account(tk.Tk(), name_list=self.name_list,
+                                                        software_to_password=self.software_to_password,
+                                                        software_to_id=self.software_to_id,
+                                                        default_name_list=self.default_name_list)
         elif software == "edit":
-            root = tk.Tk()
-            root = edit_account.Edit_account(root, name_list=self.name_list,
-                                             software_to_password=self.software_to_password,
-                                             software_to_id=self.software_to_id,
-                                             default_name_list=self.default_name_list)
-            root.mainloop()
+            self.edit = edit_account.Edit_account(tk.Tk(), name_list=self.name_list,
+                                                  software_to_password=self.software_to_password,
+                                                  software_to_id=self.software_to_id)
         elif software == "credits":
             self.print_screen(
                 "Creator/Developer: Elie Ruggiero. Many thanks to ZukaBri3k (https://github.com/ZukaBri3k/CommandInvite/blob/main/main.py) for his precious help!")
@@ -159,6 +146,9 @@ class App(tk.Frame):
         self.root.clipboard_clear()
         self.root.clipboard_append(text)
         self.root.update()
+
+    def print_screen(self, text):
+        self.listbox.insert('end', text)
 
     def read_txt(self):
         with open("password.txt", "r+") as file:
@@ -192,6 +182,5 @@ class App(tk.Frame):
             messagebox.showerror("Error", "An error has occurred, quit the software")
 
     def update_name_list(self):
-        self.name_list = {"help": None, "namelist": None, "quit": None, "cls": None, "add": None,
-                          "delete": None, "edit": None, "credits": None}
+        self.name_list = {}
         self.read_txt()

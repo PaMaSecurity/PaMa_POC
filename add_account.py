@@ -47,8 +47,6 @@ class Add_account(tk.Frame):
         password_ = ""
         for i in range(30):
             var = random.choice(characters)
-            if var == "0" or var == "O":
-                print("emergency" + var)
             password_ = password_ + var
         self.root.clipboard_clear()
         self.root.clipboard_append(password_)

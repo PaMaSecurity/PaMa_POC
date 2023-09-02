@@ -22,7 +22,7 @@ class App(tk.Frame):
         # variables:
         self.seed = seed
         # at the start:
-        self.print_screen("Version 1.1")
+        self.print_screen("Version 1.2")
 
     def create_dico(self):
         self.software_to_id = {}
@@ -88,7 +88,8 @@ class App(tk.Frame):
             if cmd in self.name_list or cmd in self.default_name_list and cmd != "main_password":
                 self.order_fulfilment(cmd)
             else:
-                self.update_name_list()
+                self.name_list = {}
+                self.read_txt()
                 if cmd in self.name_list or cmd in self.default_name_list:
                     self.order_fulfilment(cmd)
                 else:
@@ -129,7 +130,8 @@ class App(tk.Frame):
         elif software == "edit":
             self.edit = edit_account.Edit_account(tk.Tk(), name_list=self.name_list,
                                                   software_to_password=self.software_to_password,
-                                                  software_to_id=self.software_to_id)
+                                                  software_to_id=self.software_to_id,
+                                                  default_name_list=self.default_name_list)
         elif software == "credits":
             self.print_screen(
                 "Creator/Developer: Elie Ruggiero. Many thanks to ZukaBri3k (https://github.com/ZukaBri3k/CommandInvite/blob/main/main.py) for his precious help!")
@@ -180,7 +182,3 @@ class App(tk.Frame):
             self.print_screen(
                 "An error has occurred:( Please restart the software. If the error persists, please contact us.")
             messagebox.showerror("Error", "An error has occurred, quit the software")
-
-    def update_name_list(self):
-        self.name_list = {}
-        self.read_txt()

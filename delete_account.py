@@ -1,5 +1,5 @@
 # imports:
-from imports import tk, messagebox, convert_txt_bin, convert_bin_txt
+from imports import tk, ttk, messagebox, convert_txt_bin, convert_bin_txt
 
 
 class Delete_account(tk.Frame):
@@ -23,7 +23,9 @@ class Delete_account(tk.Frame):
         except:
             messagebox.showerror("Error", "An error has occurred, quit the software")
         tk.Label(self.root, text="Write the name of the website or software you want to delete:", fg="white", bg="black").pack()
-        self.entry_website = tk.Entry(self.root, width=61, bg='#5E615E', fg='black')
+        self.entry_website = ttk.Combobox(self.root)
+        self.entry_website['values'] = [m for m in self.name_list if m != "main_password"]
+        self.entry_website['state'] = 'readonly'
         self.entry_website.pack()
         self.entry_website.focus_set()
         tk.Button(self.root, height=1, width=35, text="Delete password", bg="#5E615E", fg="white", command=self.try_delete_account).pack()
@@ -70,7 +72,6 @@ class Delete_account(tk.Frame):
             liste[i] = convert_bin_txt(liste[i])
             if liste[i].replace("::", "").replace("\n", "").lstrip().rstrip() == website:
                 del_line = i
-                break
         # delete the website or software name, ID and password
         for i in range(3):
             del liste[del_line]

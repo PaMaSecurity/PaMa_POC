@@ -63,6 +63,8 @@ class Edit_account(tk.Frame):
                 'width') * 3 - len(self.button_confirmation.cget('text')))
             self.alert(text="", y=115)
             # modif
+            self.ID_entry.insert(0, "default")
+            self.account_name_entry.insert(0, "default")
             self.label.config(text="You change the settings of the account :")
             self.password_entry.delete(0, tk.END)
             self.password_entry.insert(0, "Enter your new main password")
@@ -81,6 +83,8 @@ class Edit_account(tk.Frame):
                 'width') * 3 - len(self.button_confirmation.cget('text')))
             self.alert(text="", y=175)
             # modif
+            self.ID_entry.delete(0, tk.END)
+            self.account_name_entry.delete(0, tk.END)
             self.label.config(text="You change the settings of the account :")
             self.account_name_entry.delete(0, tk.END)
             self.account_name_entry.insert(0, self.account_name)
@@ -95,14 +99,33 @@ class Edit_account(tk.Frame):
         account_ID_ = self.ID_entry.get().replace(" ", "")
         account_password_ = self.password_entry.get().replace(" ", "")
         if account_name_ != self.account_name or account_ID_ != self.software_to_id[self.account_name] or account_password_ != self.software_to_password[self.account_name]:
-            if messagebox.askokcancel("", f"Do you really want to change the {self.account_name} account?"):
-                if account_name_ != self.account_name and self.account_name != "main_password":
-                    self.edit_name_account(account_name_)
-                if account_ID_ != self.software_to_id[self.account_name]:
+            # if messagebox.askokcancel("", f"Do you really want to change the {self.account_name} account?"):
+            if account_name_ != self.account_name and self.account_name != "main_password":
+                if account_name_ == "":
+                    self.alert(text="You have not written anything !")
+                else:
+                    # test if the name is already taken
+                    if account_name_ in self.name_list or account_name_ in self.default_name_list:
+                        if account_name_ in self.name_list:
+                            self.alert("This name is already taken!")
+                        if account_name_ in self.default_name_list:
+                            self.alert("You cannot use the name of a command !")
+                    else:
+                        self.edit_name_account(account_name_)
+            if account_ID_ != self.software_to_id[self.account_name]:
+                if account_name_ == "":
+                    self.alert(text="You have not written anything !")
+                else:
                     self.edit_ID_account(account_ID_)
-                if account_password_ != self.software_to_password[self.account_name]:
+            if account_password_ != self.software_to_password[self.account_name]:
+                if account_name_ == "":
+                    self.alert(text="You have not written anything !")
+                else:
                     if self.account_name == "main_password":
-                        self.edit_main_password(account_password_)
+                        if account_password_ == "Enteryournewmainpassword":
+                            self.alert(text="You have not changed any information", y=115)
+                        else:
+                            self.edit_main_password(account_password_)
                     else:
                         self.edit_password_account(account_password_)
         else:
@@ -112,46 +135,39 @@ class Edit_account(tk.Frame):
                 self.alert(text="You have not made any changes")
 
     def edit_name_account(self, new_website):
-        # test if the name is already taken
-        if new_website in self.name_list or new_website in self.default_name_list:
-            if new_website in self.name_list:
-                self.alert("This name is already taken!")
-            if new_website in self.default_name_list:
-                self.alert("You cannot use the name of a command !")
-        else:
-            # change of name
-            with open("password.txt", "r") as file:
-                liste = list(file)
-                file.close()
-            for i in range(len(liste)):
-                liste[i] = convert_bin_txt(liste[i])
-                if liste[i].replace("::", "").replace("\n", "").lstrip().rstrip() == self.account_name:
-                    line = i
-            # delete the website or software name, ID and password
-            liste[line] = new_website + "::"
-            # rewrite the password.txt from list contents/elements:
-            with open("password.txt", "w") as file:
-                for n in liste:
-                    file.write(convert_txt_bin(n) + "\n")
-                file.close()
-            # insert the new account name in the entry
-            self.account_name_entry.delete(0, tk.END)
-            self.account_name_entry.insert(0, new_website)
-            # change the account name in name_list
-            del self.name_list[self.account_name]
-            self.name_list[new_website] = None
-            # change the account name in software_to_id
-            self.software_to_id[new_website] = self.software_to_id[self.account_name]
-            del self.software_to_id[self.account_name]
-            # change the account name in software_to_password
-            self.software_to_password[new_website] = self.software_to_password[self.account_name]
-            del self.software_to_password[self.account_name]
-            # give the account its new name
-            self.account_name = new_website
-            # change the account name in combobox
-            self.account_name_combobox['values'] = [m for m in self.name_list]
-            # say that the change is made
-            self.alert(text="Editing done")
+        # change of name
+        with open("password.txt", "r") as file:
+            liste = list(file)
+            file.close()
+        for i in range(len(liste)):
+            liste[i] = convert_bin_txt(liste[i])
+            if liste[i].replace("::", "").replace("\n", "").lstrip().rstrip() == self.account_name:
+                line = i
+        # delete the website or software name, ID and password
+        liste[line] = new_website + "::"
+        # rewrite the password.txt from list contents/elements:
+        with open("password.txt", "w") as file:
+            for n in liste:
+                file.write(convert_txt_bin(n) + "\n")
+            file.close()
+        # insert the new account name in the entry
+        self.account_name_entry.delete(0, tk.END)
+        self.account_name_entry.insert(0, new_website)
+        # change the account name in name_list
+        del self.name_list[self.account_name]
+        self.name_list[new_website] = None
+        # change the account name in software_to_id
+        self.software_to_id[new_website] = self.software_to_id[self.account_name]
+        del self.software_to_id[self.account_name]
+        # change the account name in software_to_password
+        self.software_to_password[new_website] = self.software_to_password[self.account_name]
+        del self.software_to_password[self.account_name]
+        # give the account its new name
+        self.account_name = new_website
+        # change the account name in combobox
+        self.account_name_combobox['values'] = [m for m in self.name_list]
+        # say that the change is made
+        self.alert(text="Editing done")
 
     def edit_ID_account(self, new_ID):
         with open("password.txt", "r") as file:
@@ -194,23 +210,20 @@ class Edit_account(tk.Frame):
         self.alert(text="Editing done")
 
     def edit_main_password(self, new_password):
-        if new_password == "Enteryournewmainpassword":
-            self.alert(text="You have not changed any information", y=115)
-        else:
-            new_password = new_password.encode()
-            new_password = hashlib.sha512(new_password).hexdigest()
-            with open("password.txt", "r") as file:
-                liste = list(file)
-                file.close()
-            for i in range(len(liste)):
-                liste[i] = convert_bin_txt(liste[i])
-                if liste[i].replace("::", "").replace('\n', '').lstrip().rstrip() == self.account_name:
-                    line = i + 2
-            # delete the website or software name, ID and password
-            liste[line] = new_password + ";;"
-            # rewrite the password.txt from list contents/elements:
-            with open("password.txt", "w") as file:
-                for n in liste:
-                    file.write(convert_txt_bin(n) + '\n')
-                file.close()
-            self.alert(text="Editing done", y=115)
+        new_password = new_password.encode()
+        new_password = hashlib.sha512(new_password).hexdigest()
+        with open("password.txt", "r") as file:
+            liste = list(file)
+            file.close()
+        for i in range(len(liste)):
+            liste[i] = convert_bin_txt(liste[i])
+            if liste[i].replace("::", "").replace('\n', '').lstrip().rstrip() == self.account_name:
+                line = i + 2
+        # delete the website or software name, ID and password
+        liste[line] = new_password + ";;"
+        # rewrite the password.txt from list contents/elements:
+        with open("password.txt", "w") as file:
+            for n in liste:
+                file.write(convert_txt_bin(n) + '\n')
+            file.close()
+        self.alert(text="Editing done", y=115)

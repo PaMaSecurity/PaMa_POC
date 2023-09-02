@@ -1,9 +1,9 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QFrame, QLabel, QLineEdit, QPushButton, QMessageBox, QAction, QApplication, QCompleter, QComboBox
 from PyQt5.QtGui import QIcon, QFont
-from setTheme import *
-from add_folder import AddFolder
-from additions import random, alpha, convert_bin_txt, convert_txt_bin, default_folder_name, french, english, dark, bright
+from additions.constants import *
+from additions.cryptography import *
+import random
 
 
 class AddAccount(QDialog):
@@ -15,9 +15,6 @@ class AddAccount(QDialog):
         self.setWindowModality(Qt.ApplicationModal)
         ### access the main self
         self.main_self = main_self
-        self.folderList_copy = [""]
-        self.folderList_copy.extend(self.main_self.folderList)
-        self.len_folderList = len(self.main_self.folderList)
         ### build the window
         self.build()
 
@@ -38,39 +35,39 @@ class AddAccount(QDialog):
         self.background.setFixedSize(self.width(), self.height())
         self.background.move(0, 0)
 
-        ### Folder
-        ## choose_folderLabel
-        self.choose_folderLabel = QLabel(self)
-        self.choose_folderLabel.setFont(self.fontLabel)
-        self.choose_folderLabel.move(10, 10)
-        ## choose_folderComboBox
-        """QComboBox
-        utiliser le folderList_copy dans le QComboBox
-        pour que, lorsqu'on ajoute un nouveau fichier, on l'ajoute dans folderList_copy pour ne pas modifier folderList du main
-        """
-        self.choose_folderComboBox = QComboBox(self.background)
-        self.choose_folderComboBox.activated.connect(lambda: self.choose_folderComboBox.clearFocus())
-        self.choose_folderComboBox.setFixedSize(100, 25)
-        self.choose_folderComboBox.move(self.choose_folderLabel.geometry().x(), self.choose_folderLabel.geometry().y() + 30)
-        self.choose_folderComboBox.addItems(self.folderList_copy)
-        # self.choose_folderComboBox.setPlaceholderText("Choisissez le dossier")
-        ## add_folderButton
-        self.add_folderButton = QPushButton(self)
-        self.add_folderButton.setFont(self.fontEntry)
-        self.add_folderButton.setFixedSize(120, 25)
-        self.add_folderButton.clicked.connect(self.add_folder)
-        self.add_folderButton.move(self.choose_folderComboBox.width()+self.choose_folderComboBox.geometry().x()+10, self.choose_folderLabel.geometry().y() + 30)
-        ## choose_folderError
-        self.choose_folderError = QLabel(self)
-        self.choose_folderError.setFont(self.fontError)
-        self.choose_folderError.setFixedWidth(300)
-        self.choose_folderError.move(self.choose_folderLabel.geometry().x(), self.add_folderButton.geometry().y() + 28)
+        # ### Folder
+        # ## choose_folderLabel
+        # self.choose_folderLabel = QLabel(self)
+        # self.choose_folderLabel.setFont(self.fontLabel)
+        # self.choose_folderLabel.move(10, 10)
+        # ## choose_folderComboBox
+        # """QComboBox
+        # utiliser le folderList_copy dans le QComboBox
+        # pour que, lorsqu'on ajoute un nouveau fichier, on l'ajoute dans folderList_copy pour ne pas modifier folderList du main
+        # """
+        # self.choose_folderComboBox = QComboBox(self.background)
+        # self.choose_folderComboBox.activated.connect(lambda: self.choose_folderComboBox.clearFocus())
+        # self.choose_folderComboBox.setFixedSize(100, 25)
+        # self.choose_folderComboBox.move(self.choose_folderLabel.geometry().x(), self.choose_folderLabel.geometry().y() + 30)
+        # # self.choose_folderComboBox.addItems(self.folderList_copy)
+        # # self.choose_folderComboBox.setPlaceholderText("Choisissez le dossier")
+        # ## add_folderButton
+        # self.add_folderButton = QPushButton(self)
+        # self.add_folderButton.setFont(self.fontEntry)
+        # self.add_folderButton.setFixedSize(120, 25)
+        # self.add_folderButton.clicked.connect(self.add_folder)
+        # self.add_folderButton.move(self.choose_folderComboBox.width()+self.choose_folderComboBox.geometry().x()+10, self.choose_folderLabel.geometry().y() + 30)
+        # ## choose_folderError
+        # self.choose_folderError = QLabel(self)
+        # self.choose_folderError.setFont(self.fontError)
+        # self.choose_folderError.setFixedWidth(300)
+        # self.choose_folderError.move(self.choose_folderLabel.geometry().x(), self.add_folderButton.geometry().y() + 28)
 
         ### New account name
         ## new_accName_label
         self.new_accName_label = QLabel(self)
         self.new_accName_label.setFont(self.fontLabel)
-        self.new_accName_label.move(self.choose_folderLabel.geometry().x(), self.choose_folderError.geometry().y() + 20)
+        self.new_accName_label.move(10, 10)
         ## QLineEdit Name
         self.new_accName = QLineEdit(self)
         self.new_accName.setFont(self.fontEntry)
@@ -124,7 +121,7 @@ class AddAccount(QDialog):
         self.new_accEmail.setFont(self.fontEntry)
         self.new_accEmail.resize(350, self.new_accEmail.height())
         self.new_accEmail.move(self.new_accEmail_label.geometry().x(), self.new_accEmail_label.geometry().y() + 30)
-        self.addressesList = [i for i in list(set(self.main_self.name_to_email.values())) if i != '']
+        self.addressesList = [i for i in list(set(self.main_self.email_list)) if i != '']
         self.addressesCompleter = QCompleter(self.addressesList, self)
         self.addressesCompleter.setCaseSensitivity(Qt.CaseInsensitive)
         self.popupAddressesCompleter = self.addressesCompleter.popup()
@@ -191,11 +188,12 @@ class AddAccount(QDialog):
         self.new_accName.setFocus()
 
     def add_folder(self):
-        AddFolder(self, self.main_self.language, self.main_self.theme).exec_()
-        if len(self.folderList_copy) - 1 == self.len_folderList:
-            self.choose_folderComboBox.setCurrentIndex(0)
-        else:
-            self.choose_folderComboBox.setCurrentIndex(len(self.folderList_copy)-1)
+        # AddFolder(self, self.main_self.language, self.main_self.theme).exec_()
+        # if len(self.folderList_copy) - 1 == self.len_folderList:
+        #     self.choose_folderComboBox.setCurrentIndex(0)
+        # else:
+        #     self.choose_folderComboBox.setCurrentIndex(len(self.folderList_copy)-1)
+        pass
 
     def try_save_accountInformations(self):
         new_accList = [self.new_accName, self.new_accAlias, self.new_accID, self.new_accEmail, self.new_accPassword]
@@ -217,10 +215,10 @@ class AddAccount(QDialog):
         for i in new_accErrorList:
             i.setText('')
 
-        ### retrieve keystrokes and put them in variables
-        new_folder = self.choose_folderComboBox.currentText()
-        if new_folder == "":
-            new_folder = default_folder_name
+        # ### retrieve keystrokes and put them in variables
+        # new_folder = self.choose_folderComboBox.currentText()
+        # if new_folder == "":
+        #     new_folder = default_folder_name
         new_name = self.new_accName.text().replace(' ', '')
         new_alias = self.new_accAlias.text().replace(' ', '')
         new_id = self.new_accID.text().replace(' ', '')
@@ -306,7 +304,7 @@ class AddAccount(QDialog):
                     self.new_accPasswordError.setText('This text field is mandatory')
         # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
         elif new_name in self.main_self.name_list or new_name in [''.join(i) for i in
-                                                                  list(self.main_self.name_to_alias.values())]:
+                                                                  list(self.main_self.alias_list)]:
             if self.main_self.theme == dark:
                 self.new_accName.setStyleSheet(
                     f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
@@ -319,7 +317,7 @@ class AddAccount(QDialog):
             elif self.main_self.language == english:
                 self.new_accNameError.setText('The name is already taken...')
         # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        elif new_alias in self.main_self.name_list or new_alias in [i for i in list(self.main_self.name_to_alias.values()) if i != ''] or new_alias == new_name:
+        elif new_alias in self.main_self.name_list or new_alias in [i for i in self.main_self.alias_list if i != ''] or new_alias == new_name:
             if self.main_self.theme == dark:
                 self.new_accAlias.setStyleSheet(
                     f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
@@ -332,36 +330,35 @@ class AddAccount(QDialog):
             elif self.main_self.language == english:
                 self.new_accAliasError.setText('The name is already taken...')
         # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        elif new_folder == new_name or new_folder == new_alias:
-            if new_folder == new_name:
-                if self.main_self.theme == dark:
-                    self.new_accName.setStyleSheet(
-                        f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
-                elif self.main_self.theme == bright:
-                    self.new_accName.setStyleSheet(
-                        f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
-                # ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
-                if self.main_self.language == french:
-                    self.new_accNameError.setText('Le nom du compte ne peut pas être le même que le nom du dossier')
-                elif self.main_self.language == english:
-                    self.new_accNameError.setText('The account name cannot be the same as the folder name')
-            # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            else:
-                if self.main_self.theme == dark:
-                    self.new_accAlias.setStyleSheet(
-                        f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
-                elif self.main_self.theme == bright:
-                    self.new_accAlias.setStyleSheet(
-                        f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
-                # ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
-                if self.main_self.language == french:
-                    self.new_accAliasError.setText("Le nom de l'alias ne peut pas être le même que le nom du dossier")
-                elif self.main_self.language == english:
-                    self.new_accAliasError.setText('The alias name cannot be the same as the folder name')
+        # elif new_folder == new_name or new_folder == new_alias:
+        #     if new_folder == new_name:
+        #         if self.main_self.theme == dark:
+        #             self.new_accName.setStyleSheet(
+        #                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+        #         elif self.main_self.theme == bright:
+        #             self.new_accName.setStyleSheet(
+        #                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+        #         # ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
+        #         if self.main_self.language == french:
+        #             self.new_accNameError.setText('Le nom du compte ne peut pas être le même que le nom du dossier')
+        #         elif self.main_self.language == english:
+        #             self.new_accNameError.setText('The account name cannot be the same as the folder name')
+        #     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        #     else:
+        #         if self.main_self.theme == dark:
+        #             self.new_accAlias.setStyleSheet(
+        #                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
+        #         elif self.main_self.theme == bright:
+        #             self.new_accAlias.setStyleSheet(
+        #                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
+        #         # ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
+        #         if self.main_self.language == french:
+        #             self.new_accAliasError.setText("Le nom de l'alias ne peut pas être le même que le nom du dossier")
+        #         elif self.main_self.language == english:
+        #             self.new_accAliasError.setText('The alias name cannot be the same as the folder name')
         ################################################################################################################
         else:
             with open('files/password.txt', 'a') as f:
-                f.write(convert_txt_bin(new_folder + '[[[[', self.main_self.seed) + '\n')
                 if new_alias != '':
                     f.write(convert_txt_bin(new_name + '--', self.main_self.seed) + '\n')
                     f.write(convert_txt_bin(new_alias + '::', self.main_self.seed) + '\n')
@@ -371,21 +368,10 @@ class AddAccount(QDialog):
                 f.write(convert_txt_bin(new_email + '%%', self.main_self.seed) + '\n')
                 f.write(convert_txt_bin(new_password + ';;', self.main_self.seed) + '\n')
                 f.close()
-            self.main_self.name_to_folder[new_name] = new_folder
             self.main_self.name_list.append(new_name)
-            self.main_self.name_to_alias[new_name] = new_alias
-            self.main_self.name_to_ID[new_name] = new_id
-            self.main_self.name_to_email[new_name] = new_email
-            self.main_self.name_to_password[new_name] = new_password
-
-            self.main_self.folderList = [i for i in list(set(self.main_self.name_to_folder.values())) if i != default_folder_name]
-            self.main_self.folder_to_list = {i: [] for i in self.main_self.folderList}
-            self.main_self.main_folderList = [i for i in self.main_self.name_list if self.main_self.name_to_folder[i] == default_folder_name]
-            for i in self.main_self.name_list:
-                if self.main_self.name_to_folder[i] != default_folder_name:
-                    list_ = self.main_self.folder_to_list[self.main_self.name_to_folder[i]]
-                    list_.append(i)
-                    self.main_self.folder_to_list[self.main_self.name_to_folder[i]] = list_
+            self.main_self.alias_list.append(new_alias)
+            self.main_self.email_list.append(new_email)
+            self.main_self.liste.append([new_name, new_alias, new_id, new_email, new_password])
 
             ### inform the user
             messagebox = QMessageBox()
@@ -437,22 +423,18 @@ class AddAccount(QDialog):
     def setTheme(self, theme):
         if theme == dark:
             self.background.setStyleSheet(f'background: #{dark_background};')
-            ### add folder
-            self.choose_folderLabel.setStyleSheet(f'color: #{dark_color}')
-            ## combobox
-            self.choose_folderComboBox.setStyleSheet(f'color: #{dark_color};')
-            ## button
-            self.add_folderButton.setStyleSheet(
-                'QPushButton{background: #' + dark_background + '; color: #' + dark_color + '; border: 1px solid #' + dark_border + '; border-radius: 2px;}' +
-                'QPushButton:hover{background: #' + dark_background_hover + ';}')
+            # ### add folder
+            # self.choose_folderLabel.setStyleSheet(f'color: #{dark_color}')
+            # self.choose_folderComboBox.setStyleSheet(f'color: #{dark_color};')
+            # self.add_folderButton.setStyleSheet(
+            #     'QPushButton{background: #' + dark_background + '; color: #' + dark_color + '; border: 1px solid #' + dark_border + '; border-radius: 2px;}' +
+            #     'QPushButton:hover{background: #' + dark_background_hover + ';}')
+            # self.choose_folderError.setStyleSheet(f'color: #{dark_alert}')
             ### account name
             self.new_accName_label.setStyleSheet(f'color: #{dark_color}')
             self.new_accName.setStyleSheet(
                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
             self.new_accNameError.setStyleSheet(f'color: #{dark_alert}')
-
-            ## add folder error
-            self.choose_folderError.setStyleSheet(f'color: #{dark_alert}')
             ### account alias
             self.new_accAlias_label.setStyleSheet(f'color: #{dark_color}')
             self.new_accAlias.setStyleSheet(
@@ -485,21 +467,17 @@ class AddAccount(QDialog):
 
         elif theme == bright:
             self.background.setStyleSheet(f'background: #{bright_background};')
-            ### add folder
-            self.choose_folderLabel.setStyleSheet(f'color: #{bright_color}')
-            ## combobox
-            self.choose_folderComboBox.setStyleSheet(f'color: #{bright_color};')
-            ## button
-            self.add_folderButton.setStyleSheet(
-                'QPushButton{background: #' + bright_background + '; border: 1px solid #' + bright_border + '; border-radius: 2px;}' +
-                'QPushButton:hover{background: #' + bright_background_hover + ';}')
+            # ### add folder
+            # self.choose_folderLabel.setStyleSheet(f'color: #{bright_color}')
+            # self.choose_folderComboBox.setStyleSheet(f'color: #{bright_color};')
+            # self.add_folderButton.setStyleSheet(
+            #     'QPushButton{background: #' + bright_background + '; border: 1px solid #' + bright_border + '; border-radius: 2px;}' +
+            #     'QPushButton:hover{background: #' + bright_background_hover + ';}')
+            # self.choose_folderError.setStyleSheet(f'color: #{bright_alert}')
             ### account name
             self.new_accName.setStyleSheet(
                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
             self.new_accNameError.setStyleSheet(f'color: #{bright_alert}')
-
-            ## add folder error
-            self.choose_folderError.setStyleSheet(f'color: #{bright_alert}')
             ### account alias
             self.new_accAlias.setStyleSheet(
                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
@@ -529,8 +507,8 @@ class AddAccount(QDialog):
     def translate(self, language):
         if language == french:
             self.setWindowTitle('Ajouter un compte')
-            self.choose_folderLabel.setText('Dossier (facultatif):')
-            self.add_folderButton.setText("Ajouter un dossier")
+            # self.choose_folderLabel.setText('Dossier (facultatif):')
+            # self.add_folderButton.setText("Ajouter un dossier")
             self.new_accName_label.setText('Nom du compte:')
             self.new_accAlias_label.setText('Alias (facultatif):')
             self.new_accID_label.setText('Identifiant (facultatif):')
@@ -542,8 +520,8 @@ class AddAccount(QDialog):
 
         elif language == english:
             self.setWindowTitle('Add an account')
-            self.choose_folderLabel.setText('Folder (optional):')
-            self.add_folderButton.setText("Add a folder")
+            # self.choose_folderLabel.setText('Folder (optional):')
+            # self.add_folderButton.setText("Add a folder")
             self.new_accName_label.setText('Account name:')
             self.new_accAlias_label.setText('Alias (optional):')
             self.new_accID_label.setText('Identifier (optional):')

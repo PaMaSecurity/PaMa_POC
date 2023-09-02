@@ -5,7 +5,7 @@
 > EN **This version of PaMa has not been designed by professionals. Errors may therefore persist, affecting the security of saved data.**
 
 ## Français
-Gestionnaire de mots de passe 2.2
+Gestionnaire de mots de passe 2.3
 Merci d'avoir téléchargé ce gestionnaire de mots de passe !
 Pour qu'il fonctionne correctement, vous devez avoir installé python 3.10 ou supérieur.
 > Les librairies suivantes doivent être installées pour garantir le fonctionnement de l'application:
@@ -26,7 +26,7 @@ Pour qu'il fonctionne correctement, vous devez avoir installé python 3.10 ou su
 Si vous rencontrer un probleme durant l'utilisation du logiciel contactez nous.
 
 ## English
-Password manager 2.2
+Password manager 2.3
 Thank you for downloading this password manager!
 For it to work properly, you need to have installed python 3.10 or higher.
 > The following libraries must be installed for the application to work:

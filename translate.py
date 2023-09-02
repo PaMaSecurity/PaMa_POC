@@ -1,4 +1,4 @@
-from additions import french, english
+from additions.constants.languages import *
 
 
 class Translate:
@@ -19,11 +19,7 @@ class Translate:
         self.self.helpMenu.setTitle('Aide')
         self.self.helpButton.setText('Aide en ligne')
         self.self.searchBar.setPlaceholderText('Recherche')
-        self.self.item_AccountName.setText('Nom du compte')
-        self.self.item_AccountAlias.setText('Alias')
-        self.self.item_AccountID.setText('Identifiant')
-        self.self.item_AccountEmail.setText('Email')
-        self.self.item_AccountPassword.setText('Mot de passe')
+        self.self.tree.setHeaderLabels(['Nom du compte', 'Alias', 'Identifiant', 'Email'])
 
         ### update window
         self.self.search()
@@ -41,11 +37,7 @@ class Translate:
         self.self.helpMenu.setTitle('Help')
         self.self.helpButton.setText('Online help')
         self.self.searchBar.setPlaceholderText('Search')
-        self.self.item_AccountName.setText('Account Name')
-        self.self.item_AccountAlias.setText('Alias')
-        self.self.item_AccountID.setText('Identifier')
-        self.self.item_AccountEmail.setText('Email')
-        self.self.item_AccountPassword.setText('Password')
+        self.self.tree.setHeaderLabels(['Name', 'Alias', 'Identifier', 'Email'])
 
         ### update window
         self.self.search()

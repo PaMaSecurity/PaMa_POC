@@ -4,16 +4,15 @@ try:
     from sys import exit as sys_exit, argv as sys_argv
     from pickle import dump, load
     from functools import partial
-    from PyQt5.QtCore import Qt, QTimer
-    from PyQt5.QtGui import QCursor, QFont, QIcon, QPixmap, QKeySequence
+    from PyQt5.QtCore import Qt, QTimer, pyqtSlot, QModelIndex, QSize
+    from PyQt5.QtGui import QCursor, QFont, QIcon, QPixmap, QKeySequence, QKeyEvent, QWheelEvent
     from PyQt5.QtWidgets import QAbstractItemView, QAction, QApplication, QFrame, QHeaderView, QLabel, QLineEdit, \
-        QListWidget, QMainWindow, QMenu, QMessageBox, QProgressBar, QPushButton, QSizePolicy, QTableWidget, \
-        QTableWidgetItem, QDialog, QShortcut, QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QListWidgetItem
+        QListWidget, QMainWindow, QMenu, QMessageBox, QProgressBar, QPushButton, QSizePolicy, QTreeWidget, \
+        QTableWidgetItem, QDialog, QShortcut, QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QListWidgetItem, \
+        QTreeWidgetItem, QScrollBar
     from re import search
-    from os import popen
-    from additions import QPushButtonRight, convert_bin_txt, convert_txt_bin, create_seed, alpha, easy_password, \
-        default_folder_name, french, english, dark, bright, dark_color, dark_background, dark_border, \
-        bright_background, bright_border, bright_alert, dark_background_hover, bright_background_hover
+    from os import popen, path
+    from additions import *
     from translate import Translate
     from setTheme import SetTheme
     from settings import WindowSettings
@@ -38,31 +37,30 @@ except:
     except:
         print("error code 1: functools")
     try:
-        from PyQt5.QtCore import Qt, QTimer
+        from PyQt5.QtCore import Qt, QTimer, pyqtSlot, QModelIndex, QSize
     except:
-        print("error code 1: PyQt5.QtCore")
+        print("error code 1: QtCore")
     try:
-        from PyQt5.QtGui import QCursor, QFont, QIcon, QPixmap, QKeySequence
+        from PyQt5.QtGui import QCursor, QFont, QIcon, QPixmap, QKeySequence, QKeyEvent, QWheelEvent
     except:
-        print("error code 1: PyQt5.QtGui")
+        print("error code 1: QtGui")
     try:
         from PyQt5.QtWidgets import QAbstractItemView, QAction, QApplication, QFrame, QHeaderView, QLabel, QLineEdit, \
-            QListWidget, QMainWindow, QMenu, QMessageBox, QProgressBar, QPushButton, QSizePolicy, QTableWidget, \
-            QTableWidgetItem, QDialog, QShortcut, QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QListWidgetItem
+            QListWidget, QMainWindow, QMenu, QMessageBox, QProgressBar, QPushButton, QSizePolicy, QTreeWidget, \
+            QTableWidgetItem, QDialog, QShortcut, QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QListWidgetItem, \
+            QTreeWidgetItem
     except:
-        print("error code 1: PyQt5.QtWidgets")
+        print("error code 1: QtWidgets")
     try:
         from re import search
     except:
         print("error code 1: re")
     try:
-        from os import popen
+        from os import popen, path
     except:
         print("error code 1: os")
     try:
-        from additions import QPushButtonRight, convert_bin_txt, convert_txt_bin, create_seed, alpha, easy_password, \
-            default_folder_name, french, english, dark, bright, dark_color, dark_background, dark_border, \
-            bright_background, bright_border, bright_alert, dark_background_hover, bright_background_hover
+        from additions import *
     except:
         print("error code 1: additions")
     try:
@@ -70,8 +68,7 @@ except:
     except:
         print("error code 1: translate")
     try:
-        from setTheme import SetTheme, dark_color, dark_background, dark_border, bright_background, bright_border, \
-            bright_alert, dark_background_hover, bright_background_hover
+        from setTheme import SetTheme
     except:
         print("error code 1: setTheme")
     try:

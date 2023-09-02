@@ -22,7 +22,7 @@ class App(tk.Frame):
         # variables:
         self.seed = seed
         # at the start:
-        self.print_screen("Version 1.3")
+        self.print_screen("Version 1.3.1")
 
     def create_dico(self):
         self.software_to_id = {}
@@ -75,28 +75,29 @@ class App(tk.Frame):
     def resize(self, event=None):
         x = round(self.root.winfo_width() / 6)
         y = round(self.root.winfo_height() / 16.667)
-        z = round(self.root.winfo_height() / 66.6667)
+        # z = round(self.root.winfo_height() / 66.6667)
         self.entry.config(width=x)
         self.listbox.config(width=x, height=y)
 
     def add_listbox(self, event=None):
-        self.print_screen('>>> ' + self.entry.get())
-        cmd = self.entry.get()
-        self.entry.delete(0, tk.END)
-        cmd = cmd.lower().replace(" ", "")
-        try:
-            if cmd in self.name_list or cmd in self.default_name_list and cmd != "main_password":
-                self.order_fulfilment(cmd)
-            else:
-                self.name_list = {}
-                self.read_txt()
-                if cmd in self.name_list or cmd in self.default_name_list:
+        if self.entry.get().replace(" ", "") != "":
+            self.print_screen('>>> ' + self.entry.get())
+            cmd = self.entry.get()
+            self.entry.delete(0, tk.END)
+            cmd = cmd.lower().replace(" ", "")
+            try:
+                if cmd in self.name_list or cmd in self.default_name_list and cmd != "main_password":
                     self.order_fulfilment(cmd)
                 else:
-                    self.print_screen("Sorry, the account name is not registered in our database...")
-                    self.print_screen("Write 'help' to consult the list of commands.")
-        except:
-            self.print_screen("error")
+                    self.name_list = {}
+                    self.read_txt()
+                    if cmd in self.name_list or cmd in self.default_name_list:
+                        self.order_fulfilment(cmd)
+                    else:
+                        self.print_screen("Sorry, the account name is not registered in our database...")
+                        self.print_screen("Write 'help' to consult the list of commands.")
+            except:
+                self.print_screen("error")
 
     def order_fulfilment(self, software):
         if software == "help":

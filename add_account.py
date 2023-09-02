@@ -42,7 +42,8 @@ class Add_account(tk.Frame):
         self.alert.pack()
 
     def generate_random_password(self):
-        characters = list("1" + "2" + "3" + "4" + "5" + "6" + "7" + "8" + "9" + "!" + "@" + "#" + "$" + "%" + "^" + "&" + "*" + "(" + ")" + '"' + "a" + "z" + "e" + "r" + "t" + "y" + "u" + "i" + "o" + "p" + "q" + "s" + "d" + "f" + "g" + "h" + "j" + "k" + "m" + "w" + "x" + "c" + "v" + "b" + "n" + "A" + "Z" + "E" + "R" + "T" + "Y" + "U" + "P" + "Q" + "S" + "D" + "F" + "G" + "H" + "J" + "K" + "L" + "M" + "W" + "X" + "C" + "V" + "B" + "N")
+        characters = list(alpha)
+        random.seed()
         random.shuffle(characters)
         password_ = ""
         for i in range(30):
@@ -104,3 +105,6 @@ class Add_account(tk.Frame):
         self.software_to_id[website_] = id_
         self.software_to_password[website_] = password_
         self.alert.config(text="The account has been saved")
+
+    def quit_window(self):
+        self.root.quit()

@@ -100,12 +100,7 @@ class Edit_account(tk.Frame):
         account_ID_ = self.ID_entry.get().replace(" ", "")
         account_password_ = self.password_entry.get().replace(" ", "")
         # check if there has been a change
-        if not account_name_ != self.account_name or account_ID_ != self.software_to_id[self.account_name] or account_password_ != self.software_to_password[self.account_name]:
-            if self.account_name == "main_password":
-                self.alert(text="You have not made any changes", y=115)
-            else:
-                self.alert(text="You have not made any changes")
-        else:
+        if account_name_ != self.account_name or account_ID_ != self.software_to_id[self.account_name] or account_password_ != self.software_to_password[self.account_name]:
             # Ask if the user really wants to save the changes
             if not messagebox.askokcancel("", f"Do you really want to change the {self.account_name} account?"):
                 if self.account_name == "main_password":
@@ -127,6 +122,11 @@ class Edit_account(tk.Frame):
                 else:
                     # Call up the account modification function
                     self.edit_account(account_name_, account_ID_, account_password_)
+        else:
+            if self.account_name == "main_password":
+                self.alert(text="You have not made any changes", y=115)
+            else:
+                self.alert(text="You have not made any changes")
 
     def edit_account(self, account_name_, account_ID_, account_password_):
         # If account_name_ is different from the registered version
@@ -158,6 +158,7 @@ class Edit_account(tk.Frame):
             else:
                 if self.account_name == "main_password":
                     if account_password_ == "Enteryournewmainpassword":
+                        print(account_password_)
                         self.alert(text="You have not changed any information", y=115)
                     else:
                         self.edit_main_password(account_password_)
@@ -257,3 +258,6 @@ class Edit_account(tk.Frame):
                 file.write(convert_txt_bin(n) + '\n')
             file.close()
         self.alert(text="Editing done", y=115)
+
+    def quit_window(self):
+        self.root.quit()

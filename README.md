@@ -7,7 +7,7 @@
 > If you decide to use the application, we do not guarantee the security or integrity of the information recorded.
 
 ## Français
-Gestionnaire de mots de passe 1.3
+Gestionnaire de mots de passe 1.4
 Merci d'avoir téléchargé ce gestionnaire de mots de passe !
 Pour qu'il fonctionne correctement, vous devez avoir installé python 3.10 ou supérieur.
 Les librairies hashlib, tkinter et random doivent être installées.
@@ -35,7 +35,7 @@ Quitter l'application.
 Si vous rencontrer un probleme durant l'utilisation du logiciel contactez nous.
 
 ## English
-Password manager 1.3
+Password manager 1.4
 Thank you for downloading this password manager!
 For it to work properly, you must have python 3.10 or higher installed.
 The hashlib, tkinter and random libraries must be installed.

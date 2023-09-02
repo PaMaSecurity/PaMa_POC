@@ -24,7 +24,11 @@ class Delete_account(tk.Frame):
             messagebox.showerror("Error", "An error has occurred, quit the software")
         tk.Label(self.root, text="Write the name of the website or software you want to delete:", fg="white", bg="black").pack()
         self.entry_website = ttk.Combobox(self.root)
-        self.entry_website['values'] = [m for m in self.name_list if m != "main_password"]
+        liste = [m for m in self.name_list if m != "main_password"]
+        if not liste:
+            self.entry_website['values'] = [" "]
+        else:
+            self.entry_website['values'] = liste
         self.entry_website['state'] = 'readonly'
         self.entry_website.pack()
         self.entry_website.focus_set()
@@ -37,7 +41,7 @@ class Delete_account(tk.Frame):
         website = self.entry_website.get()
         website = website.lstrip().rstrip().replace(" ", "")
         if website == "":
-            self.alert.config(text="You have not written anything")
+            self.alert.config(text="You have not selected anything")
             self.entry_website.delete(0, tk.END)
         else:
             for i in self.name_list:
@@ -83,3 +87,11 @@ class Delete_account(tk.Frame):
         self.alert.config(text="Successful deletion !")
         self.entry_website.delete(0, tk.END)
         del self.name_list[website]
+        liste = [m for m in self.name_list if m != "main_password"]
+        if not liste:
+            self.entry_website['values'] = [" "]
+        else:
+            self.entry_website['values'] = liste
+
+    def quit_window(self):
+        self.root.quit()

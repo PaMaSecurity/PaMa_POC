@@ -33,7 +33,7 @@ class EditAccount(QDialog):
         self.fontError = QFont('Arial Nova Light', 8)
         ### window
         ## give an icon to the window
-        self.setWindowIcon(QIcon('resources/password_icon.ico'))
+        self.setWindowIcon(QIcon('resources/pama.ico'))
         ## set a fix size to the window
         self.setFixedSize(700, 500)
         ## background
@@ -143,6 +143,14 @@ class EditAccount(QDialog):
         self.generatePassword_Button.setFont(QFont('Arial Nova Light', 10))
         self.generatePassword_Button.clicked.connect(self.generatePassword)
         self.generatePassword_Button.move(self.new_accPassword_label.geometry().x(), self.new_accPasswordError.geometry().y() + 20)
+
+        ### confirmButton
+        self.confirmButton = QPushButton(self)
+        self.confirmButton.setFont(QFont('Times', 17))
+        self.confirmButton.setFixedSize(120, 30)
+        self.confirmButton.move(self.width() - self.confirmButton.width() - 30,
+                                self.height() - self.confirmButton.height() - 30)
+        self.confirmButton.pressed.connect(self.try_save_accountInformations)
 
         ### translate
         self.translate(self.main_self.language)
@@ -277,7 +285,7 @@ class EditAccount(QDialog):
                 elif self.main_self.language == 'english':
                     self.new_accNameError.setText('The name is already taken...')
             # //////////////////////////////////////////////////////////////////////////////////////////////////////////
-            elif "".join(new_alias) in self.main_self.name_list or new_alias == [new_name]:
+            elif new_alias in self.main_self.name_list or new_alias in [i for i in list(self.main_self.name_to_alias.values()) if i != self.accAlias] or new_alias == new_name:
                 if self.main_self.theme == 'dark':
                     self.new_accAlias.setStyleSheet(
                         f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
@@ -311,7 +319,7 @@ class EditAccount(QDialog):
                             break
                 # //////////////////////////////////////////////////////////////////////////////////////////////////////
                 if new_alias != self.accAlias:
-                    for i in list(self.main_self.name_to_alias.values()):
+                    for i in [i for i in list(self.main_self.name_to_alias.values()) if i != '' or i != self.accAlias]:
                         if new_alias == i:
                             run2 = False
                             if self.main_self.theme == 'dark':
@@ -359,7 +367,6 @@ class EditAccount(QDialog):
                         for i in range(len(file)):
                             if file[i] == self.accName + '--' or file[i] == self.accName + '::':
                                 line = i
-                                j = 0
                                 for j in range(i, len(file)):
                                     if ';;' in file[j]:
                                         end_line = j + 1
@@ -400,9 +407,10 @@ class EditAccount(QDialog):
                         ### update
                         self.main_self.data_in_table(self.main_self)
                         self.main_self.search()
+                        self.close()
             # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         else:
-            pass
+            self.close()
 
     def generatePassword(self):
         characters = list(alpha)
@@ -451,7 +459,12 @@ class EditAccount(QDialog):
             self.new_accPasswordError.setStyleSheet(f'color: #{dark_alert}')
             ### generate password button
             self.generatePassword_Button.setStyleSheet(
-                f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_border}; border-radius: 2px;')
+                'QPushButton{background: #' + dark_background + '; color: #' + dark_color + '; border: 1px solid #' + dark_border + '; border-radius: 2px;}' +
+                'QPushButton:hover{background: #' + dark_background_hover + ';}')
+            ### confirm button
+            self.confirmButton.setStyleSheet(
+                'QPushButton{background: #' + dark_background + '; color: #' + dark_color + '; border: 1px solid #' + dark_border + '; border-radius: 2px;}' +
+                'QPushButton:hover{background: #' + dark_background_hover + ';}')
 
         elif theme == 'bright':
             self.background.setStyleSheet(f'background: #{bright_background};')
@@ -477,7 +490,12 @@ class EditAccount(QDialog):
             self.new_accPasswordError.setStyleSheet(f'color: #{bright_alert}')
             ### generate password button
             self.generatePassword_Button.setStyleSheet(
-                f'background: #{bright_background}; border: 1px solid #{bright_border}; border-radius: 2px;')
+                'QPushButton{background: #' + bright_background + '; border: 1px solid #' + bright_border + '; border-radius: 2px;}' +
+                'QPushButton:hover{background: #' + bright_background_hover + ';}')
+            ### confirm button
+            self.confirmButton.setStyleSheet(
+                'QPushButton{background: #' + bright_background + '; border: 1px solid #' + bright_border + '; border-radius: 2px;}' +
+                'QPushButton:hover{background: #' + bright_background_hover + ';}')
 
     def translate(self, language):
         if language == 'french':
@@ -489,6 +507,7 @@ class EditAccount(QDialog):
             self.new_accPassword_label.setText('Mot de passe:')
             self.generatePassword_Button.setText('Générer un mot de passe')
             self.generatePassword_Button.setFixedSize(195, 25)
+            self.confirmButton.setText('Sauvegarder')
 
         elif language == 'english':
             self.setWindowTitle('Edit the account')
@@ -499,6 +518,7 @@ class EditAccount(QDialog):
             self.new_accPassword_label.setText('Password:')
             self.generatePassword_Button.setText('Generate a password')
             self.generatePassword_Button.setFixedSize(165, 25)
+            self.confirmButton.setText('Save')
 
     def visible(self):
         if not self.password_isVisible:
@@ -531,7 +551,7 @@ class EditAccount(QDialog):
                 self.new_accPassword.text().replace(' ', '') != self.accPassword:
             exitMessage = QMessageBox()
             exitMessage.setIcon(QMessageBox.Question)
-            exitMessage.setWindowIcon(QIcon('resources/password_icon.ico'))
+            exitMessage.setWindowIcon(QIcon('resources/pama.ico'))
             if self.main_self.language == 'french':
                 exitMessage.setWindowTitle('Quitter')
                 exitMessage.setText('Voulez-vous vraiment fermer la fenêtre ?')

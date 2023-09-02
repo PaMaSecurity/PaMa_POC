@@ -1,13 +1,15 @@
 # variables:
 dark_color = 'CFCFCF'
 dark_background = '3D3D3D'
+dark_background_hover = '555555'
 dark_background_entry = '868686'
 dark_color_entry = '000000'
 dark_border = '777777'
 dark_entry_border = 'B6B6B6'
-dark_alert = 'FF4040'
+dark_alert = 'FF5757'
 
 bright_background = 'F5F5F5'
+bright_background_hover = 'E0E0E0'
 bright_background_entry = 'D6D6D6'
 bright_border = '1F1F1F'
 selection_color = '7678FF'

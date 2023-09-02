@@ -1,9 +1,3 @@
-"""
-->Résoudre le problème du 'supprimer' qui devient blanc quand la souris passe dessus et que le theme est sur 'bright.
-->Ajouter un bouton 'sauvegarder' dans add_account et edit_account.
-->Faire un truc présentable pour la vérification et la création du mot de passe, respectivement dans GetPassword et CreatePassword.
-->Dans GetPassword le raccourci ne fonctionne pas...
-"""
 # imports:
 from mainH import *
 
@@ -132,11 +126,11 @@ class Window(QMainWindow):
         self.setTheme(self.theme)
 
         ### credis
-        label = QLabel(self)
-        label.setFont(QFont('Arial', 7))
-        label.setFixedSize(160, 20)
-        label.setText('Password manager 2.1 Elie Ruggiero')
-        label.move(self.width()-label.width(), label.height())
+        credis = QLabel(self)
+        credis.setFont(QFont('Arial', 7))
+        credis.setFixedSize(105, 20)
+        credis.setText('PaMa 2.2 Elie Ruggiero')
+        credis.move(self.width()-credis.width(), credis.height())
 
         ### display window
         self.show()
@@ -203,9 +197,15 @@ class Window(QMainWindow):
         elif self.language == 'english':
             deleteMenu.setText('Delete')
         if self.theme == 'dark':
-            self.rightClickMenu.setStyleSheet('QMenu{background-color: #' + dark_background + '; border: 1px solid #' + dark_border + '; border-radius: 3px;} QMenu::item{background-color: #' + dark_background + '; color: #' + dark_color + ';}')
+            self.rightClickMenu.setStyleSheet(
+                'QMenu{background-color: #' + dark_background + '; border: 1px solid #' + dark_border + '; border-radius: 3px;}'
+                'QMenu::item{background-color: #' + dark_background + '; color: #' + dark_color + ';}'
+                'QMenu::item:selected{background-color: #' + dark_background_hover + ';}')
         elif self.theme == 'bright':
-            self.rightClickMenu.setStyleSheet('QMenu{background-color: #' + bright_background + '; border: 1px solid #' + bright_border + '; border-radius: 3px;} QMenu::item{background-color: #' + bright_background + ';}')
+            self.rightClickMenu.setStyleSheet(
+                'QMenu{background-color: #' + bright_background + '; border: 1px solid #' + bright_border + '; border-radius: 3px;}'
+                'QMenu::item{background-color: #' + bright_background + '; color: #000000;}'
+                'QMenu::item:selected{background-color: #' + bright_background_hover + ';}')
         deleteMenu.triggered.connect(lambda: self.delete(self.row_to_name[row]))
         self.rightClickMenu.addAction(deleteMenu)
         self.rightClickMenu.popup(QCursor.pos())
@@ -249,7 +249,7 @@ class Window(QMainWindow):
 
     @staticmethod
     def help():
-        open_link('https://www.youtube.com/watch?v=2Q_ZzBGPdqE', new=2)
+        popen(r"web_page\index.html")
 
     def setTheme(self, theme):
         if theme == 'dark':
@@ -337,9 +337,11 @@ class Window(QMainWindow):
                     elif main_self.language == 'english':
                         btn.setToolTip('Change account settings')
                     if main_self.theme == 'dark':
-                        btn.setStyleSheet(f'background: #{dark_background}; border: 0px; color: #{dark_color};')
+                        btn.setStyleSheet('QPushButtonRight{background: #' + dark_background + '; border: 0px; color: #' + dark_color + ';}' +
+                                          'QPushButtonRight:hover{background: #' + dark_background_hover + ';}')
                     elif main_self.theme == 'bright':
-                        btn.setStyleSheet(f'background: #{bright_background}; border: 0px;')
+                        btn.setStyleSheet('QPushButtonRight{background: #' + bright_background + '; border: 0px;}' +
+                                          'QPushButtonRight:hover{background: #' + bright_background_hover + ';}')
                     # btn.setFixedSize(25, 25)
                     btn.adjustSize()
                     btn.rightClick.connect(partial(main_self.rightClickAction, row))
@@ -353,9 +355,11 @@ class Window(QMainWindow):
                     btn.setText('********')
                     btn.setFont(QFont('Times', 10))
                     if main_self.theme == 'dark':
-                        btn.setStyleSheet(f'background: #{dark_background}; border: 0px; color: #{dark_color};')
+                        btn.setStyleSheet('QPushButton{background: #' + dark_background + '; border: 0px; color: #' + dark_color + ';}' +
+                                          'QPushButton:hover{background: #' + dark_background_hover + ';}')
                     elif main_self.theme == 'bright':
-                        btn.setStyleSheet(f'border: 0px;')
+                        btn.setStyleSheet('QPushButton{background: #' + bright_background + '; border: 0px;}' +
+                                          'QPushButton:hover{background: #' + bright_background_hover + ';}')
                     btn.pressed.connect(partial(main_self.get_password, row))
                     main_self.row_to_name[row] = j[1]
                     main_self.name_to_row[j[1]] = row
@@ -403,7 +407,7 @@ class Window(QMainWindow):
         if not cross:
             exitMessage = QMessageBox()
             exitMessage.setIcon(QMessageBox.Question)
-            exitMessage.setWindowIcon(QIcon('resources/password_icon.ico'))
+            exitMessage.setWindowIcon(QIcon('resources/pama.ico'))
             if self.language == 'french':
                 exitMessage.setWindowTitle('Quitter')
                 exitMessage.setText('Voulez-vous vraiment fermer la fenêtre ?')
@@ -449,7 +453,7 @@ class GetPassword:
         ## give a size to the window
         self.self.setFixedSize(700, 600)
         ## add an icon to the window
-        self.self.setWindowIcon(QIcon('resources/password_icon.ico'))
+        self.self.setWindowIcon(QIcon('resources/pama.ico'))
 
         ### label
         self.label = QLabel(self.self)
@@ -493,11 +497,19 @@ class GetPassword:
         self.translate(self.self.language)
 
         self.self.valide = True
-        with open('files/password.txt', 'r') as f:
-            file = f.readlines()
-            if not file:
-                self.self.valide = False
-                CreatePassword(self).exec_()
+        try:
+            with open('files/password.txt', 'r') as f:
+                file = f.readlines()
+                if not file:
+                    self.self.valide = False
+                    CreatePassword(self).exec_()
+        except:
+            open('files/password.txt', 'x').close()
+            with open('files/password.txt', 'r') as f:
+                file = f.readlines()
+                if not file:
+                    self.self.valide = False
+                    CreatePassword(self).exec_()
 
         ### display window
         if self.self.valide:
@@ -546,7 +558,7 @@ class GetPassword:
                 password = 'None'
                 run = False
             f.close()
-        if hashlib.sha512(passwordEntry.encode()).hexdigest() != password or run == False:
+        if hashlib.sha3_512(passwordEntry.encode()).hexdigest() != password or run == False:
             if self.tried >= 3:
                 quit()
             else:
@@ -564,11 +576,11 @@ class GetPassword:
 
     def translate(self, language):
         if language == 'french':
-            self.self.setWindowTitle('Gestionnaire de mots de passe')
+            self.self.setWindowTitle('PaMa')
             self.label.setText('Entrer votre mot de passe:')
             self.confirmButton.setText('Confirmer')
         elif language == 'english':
-            self.self.setWindowTitle('Password manager')
+            self.self.setWindowTitle('PaMa')
             self.label.setText('Enter your password:')
             self.confirmButton.setText('Confirm')
 
@@ -576,8 +588,10 @@ class GetPassword:
         self.self.seed = seed
         ## hide the window
         self.self.hide()
+        self.label.deleteLater()
         self.passwordEntry.deleteLater()
         self.confirmButton.deleteLater()
+        self.alert.deleteLater()
 
         ### create/fill in variables
         ## load variables
@@ -598,7 +612,7 @@ class CreatePassword(QDialog):
 
     def build(self):
         self.setFixedSize(500, 500)
-        self.setWindowIcon(QIcon('resources/password_icon.ico'))
+        self.setWindowIcon(QIcon('resources/pama.ico'))
 
         ### label
         self.label = QLabel(self)
@@ -643,11 +657,11 @@ class CreatePassword(QDialog):
 
     def translate(self, language):
         if language == 'french':
-            self.setWindowTitle('Gestionnaire de mot de passe - Créer le mot de passe')
+            self.setWindowTitle('PaMa - Créer le mot de passe')
             self.label.setText('Choisissez un mot de passe pour ce logiciel:')
             self.confirmButton.setText('Confirmer')
         elif language == 'english':
-            self.setWindowTitle('Password manager - Create password')
+            self.setWindowTitle('PaMa - Create password')
             self.label.setText('Choose a password for this software:')
             self.confirmButton.setText('Confirm')
 
@@ -672,27 +686,52 @@ class CreatePassword(QDialog):
                 self.alert.setText(f"Vous ne pouvez pas utiliser le{'s' if len(errorList) > 1 else ''} caractère{'s' if len(errorList) > 1 else ''} suivant: {''.join(errorList)}")
             elif self.main_self.language == 'english':
                 self.alert.setText(f"You cannot use the following character{'s' if len(errorList) > 1 else ''}: {''.join(errorList)}")
+        elif passwordEntry in easy_password or search(r'(\d+([/\-|\\])\d+([/\-|\\])\d+)', passwordEntry) is not None:
+            if self.main_self.language == 'french':
+                self.alert.setText("Votre mot de passe est trop facile")
+            elif self.main_self.language == 'english':
+                self.alert.setText("Your password is too easy")
+        elif len(passwordEntry) <= 4:
+            if self.main_self.language == 'french':
+                self.alert.setText("Votre mot de passe doit contenir au moins 5 caractères")
+            elif self.main_self.language == 'english':
+                self.alert.setText("Your password must contain at least 5 characters")
+        elif search(r'(\d+)', passwordEntry) is None:
+            if self.main_self.language == 'french':
+                self.alert.setText("Votre mot de passe doit contenir au moins un chiffre")
+            elif self.main_self.language == 'english':
+                self.alert.setText("Your password must contain at least one digit")
+        elif search(r'([A-Z])', passwordEntry) is None:
+            if self.main_self.language == 'french':
+                self.alert.setText("Votre mot de passe doit contenir au moins une majuscule")
+            elif self.main_self.language == 'english':
+                self.alert.setText("Your password must contain at least one capital letter")
+        elif search(r'([a-z])', passwordEntry) is None:
+            if self.main_self.language == 'french':
+                self.alert.setText("Votre mot de passe doit contenir au moins une minuscule")
+            elif self.main_self.language == 'english':
+                self.alert.setText("Your password must contain at least one lower case letter")
         else:
             confirmPassword = QMessageBox()
-            confirmPassword.setIcon(QMessageBox.Question)
-            confirmPassword.setWindowIcon(QIcon('resources/password_icon.ico'))
+            confirmPassword.setIcon(QMessageBox.Critical)
+            confirmPassword.setWindowIcon(QIcon('resources/pama.ico'))
             if self.main_self.language == 'french':
                 confirmPassword.setWindowTitle('Enregistrer')
-                confirmPassword.setText(f'Voulez vous valider votre mot de passe: {passwordEntry} ?')
+                confirmPassword.setText("Voulez-vous valider votre mot de passe sachant qu'il sera irrécupérable si vous l'oubliez ?")
                 confirmPassword.addButton("&Oui", QMessageBox.YesRole)
                 confirmPassword.addButton("&Non", QMessageBox.NoRole)
             elif self.main_self.language == 'english':
                 confirmPassword.setWindowTitle('Save')
-                confirmPassword.setText(f'Do you want to validate your password: {passwordEntry} ?')
+                confirmPassword.setText("Do you want to validate your password knowing that it will be unrecoverable if you forget it?")
                 confirmPassword.addButton("&Yes", QMessageBox.YesRole)
                 confirmPassword.addButton("&No", QMessageBox.NoRole)
             confirmPassword.exec_()
             if confirmPassword.clickedButton().text() == '&Yes' or confirmPassword.clickedButton().text() == '&Oui':
                 self.main_self.valide = True
-                self.password = hashlib.sha512(passwordEntry.encode()).hexdigest()
-                password = convert_txt_bin(self.password, create_seed(passwordEntry))
+                self.password = hashlib.sha3_512(passwordEntry.encode()).hexdigest()
+                passwordEntry = convert_txt_bin(self.password, create_seed(passwordEntry))
                 with open('files/password.txt', 'w') as f:
-                    f.write(password + '\n')
+                    f.write(passwordEntry + '\n')
                 self.close()
 
 

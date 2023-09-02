@@ -7,7 +7,7 @@ class Translate:
         self.self.language = 'french'
 
         ### give title to the window
-        self.self.setWindowTitle('Gestionnaire de mots de passe')
+        self.self.setWindowTitle('PaMa')
         self.self.fileMenu.setTitle('Fichier')
         self.self.settingsButton.setText('Paramètres')
         self.self.exitButton.setText('Quitter')
@@ -29,7 +29,7 @@ class Translate:
         self.self.language = 'english'
 
         ### give title to the window
-        self.self.setWindowTitle('Password Manager')
+        self.self.setWindowTitle('PaMa')
         self.self.fileMenu.setTitle('File')
         self.self.settingsButton.setText('Settings')
         self.self.exitButton.setText('Exit')
@@ -38,7 +38,7 @@ class Translate:
         self.self.helpMenu.setTitle('Help')
         self.self.helpButton.setText('Online help')
         self.self.searchBar.setPlaceholderText('Search')
-        self.self.item_AccountName.setText('Account name')
+        self.self.item_AccountName.setText('Account Name')
         self.self.item_AccountAlias.setText('Alias')
         self.self.item_AccountID.setText('Identifier')
         self.self.item_AccountEmail.setText('Email')

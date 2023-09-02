@@ -1,0 +1,26 @@
+Gestionnaire de mots de passe 1.0
+Merci d'avoir téléchargé ce gestionnaire de mots de passe !
+Pour qu'il fonctionne correctement, vous devez avoir installé python 3.10 ou supérieur.
+Le programme d'installation pour python 3.10.1 est inclus dans le dossier 'files'.
+Le mot de passe par défaut est 'strongpassword'.
+Caractéristiques :
+ajouter
+Tapez la commande 'add' dans l'invite de commande.
+add vous permet d'enregistrer un nouveau compte dans le logiciel.
+cls
+Tapez la commande 'cls' à l'invite de commande pour nettoyer l'écran.
+credits
+Tapez 'credits' pour savoir qui a créé cette application.
+delete
+Tapez la commande 'delete' pour supprimer définitivement un compte.
+modifier
+Tapez 'edit' pour modifier le nom du compte, le nom d'utilisateur et/ou le mot de passe.
+Pour modifier le mot de passe principal, tapez 'main_password'.
+aide
+Tapez 'help' pour savoir quelle fonction vous permet d'effectuer l'action souhaitée.
+namelist
+Tapez 'namelist' à l'invite de commande pour voir le nom de chaque compte enregistré dans le logiciel.
+quit
+Tapez 'quit' à l'invite de commande pour quitter l'application.
+
+Si vous rencontrer un probleme durant l'utilisation du logiciel contactez nous.

@@ -6,12 +6,16 @@ class Window(QMainWindow):
 
     def __init__(self, application):
         super().__init__()
+        self.language = None
+        self.time = None
+        self.theme = None
         application.aboutToQuit.connect(lambda: self.close_window(cross=True))
         GetPassword(self)
 
         ## create dictionary
         self.row_to_name = {}
         self.name_to_row = {}
+        self.name_to_folder = {}
         self.name_list = []
         self.name_to_alias = {}
         self.name_to_ID = {}
@@ -45,12 +49,12 @@ class Window(QMainWindow):
         self.exitButton.triggered.connect(self.close_window)
         self.fileMenu.addAction(self.exitButton)
         ## AddAccountMenu
-        self.addAccountMenu = self.menuBar().addMenu('Add an account')
+        self.addMenu = self.menuBar().addMenu('Add...')
         # add an account
         self.addAccountButton = QAction(self)
         self.addAccountButton.setShortcut('Ctrl++')
         self.addAccountButton.triggered.connect(self.addAccount)
-        self.addAccountMenu.addAction(self.addAccountButton)
+        self.addMenu.addAction(self.addAccountButton)
         ## helpMenu
         self.helpMenu = self.menuBar().addMenu('Help')
         # helpMenu
@@ -63,11 +67,12 @@ class Window(QMainWindow):
         ## search result
         self.searchResults = QListWidget(self)
         self.searchResults.setGeometry(0, 100, 200, self.width() - 51)
-        self.searchResults.itemDoubleClicked.connect(self.searchResultAction)
+        self.searchResults.itemClicked.connect(self.searchResultAction)
         ## first background
         self.searchFirstBackground = QFrame(self)
         self.searchFirstBackground.setFixedSize(self.searchResults.width(), 55)
-        self.searchFirstBackground.move(self.searchResults.x(), self.searchResults.y()-self.searchFirstBackground.height())
+        self.searchFirstBackground.move(self.searchResults.x(),
+                                        self.searchResults.y() - self.searchFirstBackground.height())
         ## background
         self.searchBackground = QFrame(self)
         self.searchBackground.setFixedSize(180, 36)
@@ -81,10 +86,7 @@ class Window(QMainWindow):
         self.searchBar = QLineEdit(self)
         self.searchBar.setFixedSize(140, 25)
         self.searchBar.textChanged.connect(self.search)
-        self.searchBar.setPlaceholderText('Search')
         self.searchBar.move(40, 60)
-        ## show all possibilities
-        self.search()
 
         ### Table
         ## create tables
@@ -112,7 +114,7 @@ class Window(QMainWindow):
         # set a fixed size
         self.table.setFont(QFont('Arial', 12))
         ### https://stackoverflow.com/questions/52035966/pyqt-group-cells-in-qtablewidget
-        self.table.setColumnWidth(0, 63)   # 0, 63
+        self.table.setColumnWidth(0, 63)  # 0, 63
         self.table.setColumnWidth(1, 190)  # 1, 190
         self.table.setColumnWidth(2, 188)  # 2, 188
         self.table.setColumnWidth(3, 200)  # 3, 200
@@ -122,15 +124,18 @@ class Window(QMainWindow):
         ### Translate
         self.translate(self.language)
 
+        ### Progress Bar
+        self.progress_bar = QProgressBar(self)
+
         ### setTheme
         self.setTheme(self.theme)
 
         ### credis
-        credis = QLabel(self)
-        credis.setFont(QFont('Arial', 7))
-        credis.setFixedSize(105, 20)
-        credis.setText('PaMa 2.2 Elie Ruggiero')
-        credis.move(self.width()-credis.width(), credis.height())
+        self.credis = QLabel(self)
+        self.credis.setFont(QFont('Arial', 7))
+        self.credis.setFixedSize(105, 20)
+        self.credis.setText('PaMa 2.3 Elie Ruggiero')
+        self.credis.move(self.width() - self.credis.width(), self.credis.height())
 
         ### display window
         self.show()
@@ -138,14 +143,18 @@ class Window(QMainWindow):
         ### Timer
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.show_time)
+        self.update_timer = False
 
         ### Progress Bar
-        self.progress_bar = QProgressBar(self)
-        self.progress_bar.setGeometry(self.window().width() - 215, self.window().height() - 30, 230, 30)
-        self.progress_bar.setValue(100)
-        '''                          en secondes️'''
-        self.progress_bar.setFormat('')  # %p -> pourcentage, %v -> valeur, %m -> nombre d'étapes
+        self.progress_bar.setFixedSize(230, 30)
+        self.progress_bar.setRange(0, self.time)
+        self.count = self.time
+        self.progress_bar.setFormat(
+            str(self.count // 10) + f'    {"" if self.count // 2 > 9 else " "}')  # %p -> pourcentage, %v -> valeur, %m -> nombre d'étapes
         self.progress_bar.setVisible(0)
+        self.progress_bar.setAlignment(Qt.AlignHCenter)
+        self.progress_bar.move(self.width() - self.progress_bar.width() - 1,
+                               self.height() - self.progress_bar.height() - 1)
 
     def edit_account(self, row):
         EditAccount(self, self.row_to_name[row]).exec_()
@@ -157,19 +166,27 @@ class Window(QMainWindow):
         WindowSettings(self).exec_()
 
     def delete(self, accountName):
-        if self.language == 'french':
-            title = 'Supprimer'
-            message = f'Voulez-vous vraiment supprimer le compte {accountName}?'
-        elif self.language == 'english':
-            title = 'Delete'
-            message = f'Do you really want to delete the {accountName} account?'
-        if QMessageBox.question(self, title, message, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes) == QMessageBox.Yes:
+        delete_accountQMessageBox = QMessageBox()
+        delete_accountQMessageBox.setIcon(QMessageBox.Question)
+        delete_accountQMessageBox.setWindowIcon(QIcon('resources/pama.ico'))
+        if self.language == french:
+            delete_accountQMessageBox.setWindowTitle('Supprimer')
+            delete_accountQMessageBox.setText(f'Voulez-vous vraiment supprimer le compte {accountName}?')
+            delete_accountQMessageBox.addButton("&Oui", QMessageBox.YesRole)
+            delete_accountQMessageBox.addButton("&Non", QMessageBox.NoRole)
+        elif self.language == english:
+            delete_accountQMessageBox.setWindowTitle('Delete')
+            delete_accountQMessageBox.setText(f'Do you really want to delete the {accountName} account?')
+            delete_accountQMessageBox.addButton("&Yes", QMessageBox.YesRole)
+            delete_accountQMessageBox.addButton("&No", QMessageBox.NoRole)
+        delete_accountQMessageBox.exec_()
+        if delete_accountQMessageBox.clickedButton().text() == '&Yes' or delete_accountQMessageBox.clickedButton().text() == '&Oui':
             with open('files/password.txt', 'r') as f:
                 file = f.readlines()
                 f.close()
             file = [convert_bin_txt(i, self.seed) for i in file]
             for i in range(len(file)):
-                if file[i] == accountName + '::' or file[i] == accountName + '--':
+                if file[i] == self.name_to_folder[accountName] + '[[[[':
                     line = i
                     for j in range(i, len(file)):
                         if ';;' in file[j]:
@@ -178,7 +195,11 @@ class Window(QMainWindow):
             for i in range(line, end_line):
                 del file[line]
             with open('files/password.txt', 'w') as f:
-                [f.write(convert_txt_bin(i, self.seed)+'\n') for i in file]
+                [f.write(convert_txt_bin(i, self.seed) + '\n') for i in file]
+
+            # dicos and lists update
+            self.folderList.remove(self.name_to_folder[accountName])
+            del self.name_to_folder[accountName]
             del self.row_to_name[self.name_to_row[accountName]]
             del self.name_to_row[accountName]
             self.name_list.remove(accountName)
@@ -192,20 +213,20 @@ class Window(QMainWindow):
     def rightClickAction(self, row):
         self.rightClickMenu = QMenu()
         deleteMenu = QAction(self)
-        if self.language == 'french':
+        if self.language == french:
             deleteMenu.setText('Supprimer')
-        elif self.language == 'english':
+        elif self.language == english:
             deleteMenu.setText('Delete')
-        if self.theme == 'dark':
+        if self.theme == dark:
             self.rightClickMenu.setStyleSheet(
                 'QMenu{background-color: #' + dark_background + '; border: 1px solid #' + dark_border + '; border-radius: 3px;}'
-                'QMenu::item{background-color: #' + dark_background + '; color: #' + dark_color + ';}'
-                'QMenu::item:selected{background-color: #' + dark_background_hover + ';}')
-        elif self.theme == 'bright':
+                                                                                                        'QMenu::item{background-color: #' + dark_background + '; color: #' + dark_color + ';}'
+                                                                                                                                                                                          'QMenu::item:selected{background-color: #' + dark_background_hover + ';}')
+        elif self.theme == bright:
             self.rightClickMenu.setStyleSheet(
                 'QMenu{background-color: #' + bright_background + '; border: 1px solid #' + bright_border + '; border-radius: 3px;}'
-                'QMenu::item{background-color: #' + bright_background + '; color: #000000;}'
-                'QMenu::item:selected{background-color: #' + bright_background_hover + ';}')
+                                                                                                            'QMenu::item{background-color: #' + bright_background + '; color: #000000;}'
+                                                                                                                                                                    'QMenu::item:selected{background-color: #' + bright_background_hover + ';}')
         deleteMenu.triggered.connect(lambda: self.delete(self.row_to_name[row]))
         self.rightClickMenu.addAction(deleteMenu)
         self.rightClickMenu.popup(QCursor.pos())
@@ -214,57 +235,94 @@ class Window(QMainWindow):
         item = item.text()
         if item == 'See all' or item == 'Tout voir':
             [self.table.showRow(i) for i in range(self.table.rowCount())]
+        elif item in self.folderList:  # elif item a une icon de dossier
+            if self.searchResults.item([k for k in range(1, self.searchResults.__len__()) if
+                                        self.searchResults.item(k).text() == self.folder_to_list[item][0]][
+                                           0]).isHidden():
+                for j in self.folder_to_list[item]:
+                    self.searchResults.item(
+                        [k for k in range(1, self.searchResults.__len__()) if self.searchResults.item(k).text() == j][
+                            0]).setHidden(False)
+            else:
+                for j in self.folder_to_list[item]:
+                    self.searchResults.item(
+                        [k for k in range(1, self.searchResults.__len__()) if self.searchResults.item(k).text() == j][
+                            0]).setHidden(True)
         else:
             try:
                 [self.table.showRow(i) for i in range(self.table.rowCount())]
-                [self.table.hideRow(i) for i in [j for j in range(self.table.rowCount()) if j != self.name_to_row[item] and j != 0]]
+                [self.table.hideRow(i) for i in
+                 [j for j in range(self.table.rowCount()) if j != self.name_to_row[item] and j != 0]]
             except:
                 for key, value in self.name_to_alias.items():
                     if item == "".join(value):
                         [self.table.showRow(i) for i in range(self.table.rowCount())]
-                        [self.table.hideRow(i) for i in [j for j in range(self.table.rowCount()) if j != self.name_to_row[key] and j != 0]]
+                        [self.table.hideRow(i) for i in
+                         [j for j in range(self.table.rowCount()) if j != self.name_to_row[key] and j != 0]]
                         break
 
     def search(self):
-        self.name_list.sort()
         research = self.searchBar.text().lower().replace(' ', '')
+
         self.searchResults.clear()
-        if self.language == 'french':
+
+        if self.language == french:
             seeAll = 'Tout voir'
-        elif self.language == 'english':
+        elif self.language == english:
             seeAll = 'See all'
         self.searchResults.addItem(seeAll)
         self.searchResults.item(0).setFont(QFont("Times", 13))
-        keyword = []
-        keyword.extend(self.name_list)
+
         if research == '':
-            for i in keyword:
-                if research in i.lower():
+            searchList_not_sort = self.main_folderList.copy()
+            searchList_not_sort.extend(self.folderList)
+            searchList_not_sort.sort()
+            for i in searchList_not_sort:
+                if i in self.folderList:
+                    var = self.folder_to_list[i]
+                    var.sort()
+
+                    item = QListWidgetItem()
+                    item.setText(i)
+                    if self.theme == dark:
+                        item.setIcon(QIcon('resources/folder_dark.png'))
+                    elif self.theme == bright:
+                        item.setIcon(QIcon('resources/folder.png'))
+                    self.searchResults.addItem(item)
+                    for j in var:
+                        self.searchResults.addItem(j)
+                        self.searchResults.item([k for k in range(1, self.searchResults.__len__()) if self.searchResults.item(k).text() == j][0]).setHidden(True)
+                else:
                     self.searchResults.addItem(i)
         else:
-            keyword.extend([''.join(i) for i in self.name_to_alias.values() if i != ['']])
-            for i in keyword:
-                if research in i.lower():
-                    self.searchResults.addItem(i)
+            keywordList = self.name_list.copy()
+            keywordList.extend([i for i in self.name_to_alias.values() if i != ''])
+            for i in range(len(keywordList)):
+                item = keywordList[i].lower()
+                if research in item:
+                    self.searchResults.addItem(keywordList[i])
 
     @staticmethod
     def help():
         popen(r"web_page\index.html")
 
     def setTheme(self, theme):
-        if theme == 'dark':
+        if theme == dark:
             SetTheme(self).dark()
-        elif theme == 'bright':
+        elif theme == bright:
             SetTheme(self).bright()
 
     def translate(self, language):
-        if language == 'french':
+        if language == french:
             Translate(self).french()
-        elif language == 'english':
+        elif language == english:
             Translate(self).english()
 
     def get_password(self, row):
-        QApplication.clipboard().setText(self.name_to_password[self.row_to_name[row]])
+        if self.update_timer:
+            self.updateTimer()
+        self.get_password_row = row
+        QApplication.clipboard().setText(self.name_to_password[self.row_to_name[self.get_password_row]])
         self.count = self.time
         self.timer.start(100)
         self.start = True
@@ -273,12 +331,20 @@ class Window(QMainWindow):
     def show_time(self):
         if self.start:
             self.count -= 1
-            self.progress_bar.setValue(int(self.count * 100 / self.time))
+            self.progress_bar.setValue(self.count)
+            self.progress_bar.setFormat(str(self.count // 10) + f'    {"" if self.count // 2 > 9 else " "}')
             if self.count == 1:
                 self.timer.stop()
                 self.start = False
                 self.progress_bar.setVisible(0)
-                QApplication.clipboard().clear()
+                if QApplication.clipboard().text() == self.name_to_password[self.row_to_name[self.get_password_row]]:
+                    QApplication.clipboard().clear()
+                if self.update_timer:
+                    self.updateTimer()
+
+    def updateTimer(self):
+        self.progress_bar.setRange(0, self.time)
+        self.update_timer = False
 
     @staticmethod
     def data_in_table(main_self):
@@ -323,26 +389,35 @@ class Window(QMainWindow):
         main_self.name_list.sort()
 
         ### fill in the table
-        for j in [[None, i, main_self.name_to_alias[i], main_self.name_to_ID[i], main_self.name_to_email[i],
+        for j in [[main_self.name_to_folder[i], None, i, main_self.name_to_alias[i], main_self.name_to_ID[i],
+                   main_self.name_to_email[i],
                    main_self.name_to_password[i]] for i in main_self.name_list]:
             row = main_self.table.rowCount()
             main_self.table.setRowCount(row + 1)
             col = 0
+            isFolder = True
             for item in j:
-                if col == 0:
+                if isFolder:
+                    if item == default_folder_name:
+                        # print('normal', item, j[2])
+                        pass
+                    else:
+                        # print('other', item, j[2])
+                        pass
+                elif col == 0:
                     btn = QPushButtonRight(main_self.table)
                     btn.setText('...')
-                    if main_self.language == 'french':
+                    if main_self.language == french:
                         btn.setToolTip('Modifier les paramètres du compte')
-                    elif main_self.language == 'english':
+                    elif main_self.language == english:
                         btn.setToolTip('Change account settings')
-                    if main_self.theme == 'dark':
-                        btn.setStyleSheet('QPushButtonRight{background: #' + dark_background + '; border: 0px; color: #' + dark_color + ';}' +
-                                          'QPushButtonRight:hover{background: #' + dark_background_hover + ';}')
-                    elif main_self.theme == 'bright':
+                    if main_self.theme == dark:
+                        btn.setStyleSheet(
+                            'QPushButtonRight{background: #' + dark_background + '; border: 0px; color: #' + dark_color + ';}' +
+                            'QPushButtonRight:hover{background: #' + dark_background_hover + ';}')
+                    elif main_self.theme == bright:
                         btn.setStyleSheet('QPushButtonRight{background: #' + bright_background + '; border: 0px;}' +
                                           'QPushButtonRight:hover{background: #' + bright_background_hover + ';}')
-                    # btn.setFixedSize(25, 25)
                     btn.adjustSize()
                     btn.rightClick.connect(partial(main_self.rightClickAction, row))
                     btn.clicked.connect(partial(main_self.edit_account, row))
@@ -354,17 +429,21 @@ class Window(QMainWindow):
                     btn = QPushButton(main_self.table)
                     btn.setText('********')
                     btn.setFont(QFont('Times', 10))
-                    if main_self.theme == 'dark':
-                        btn.setStyleSheet('QPushButton{background: #' + dark_background + '; border: 0px; color: #' + dark_color + ';}' +
-                                          'QPushButton:hover{background: #' + dark_background_hover + ';}')
-                    elif main_self.theme == 'bright':
+                    if main_self.theme == dark:
+                        btn.setStyleSheet(
+                            'QPushButton{background: #' + dark_background + '; border: 0px; color: #' + dark_color + ';}' +
+                            'QPushButton:hover{background: #' + dark_background_hover + ';}')
+                    elif main_self.theme == bright:
                         btn.setStyleSheet('QPushButton{background: #' + bright_background + '; border: 0px;}' +
                                           'QPushButton:hover{background: #' + bright_background_hover + ';}')
                     btn.pressed.connect(partial(main_self.get_password, row))
-                    main_self.row_to_name[row] = j[1]
-                    main_self.name_to_row[j[1]] = row
+                    main_self.row_to_name[row] = j[2]
+                    main_self.name_to_row[j[2]] = row
                     main_self.table.setCellWidget(row, col, btn)
-                col += 1
+                if not isFolder:
+                    col += 1
+                else:
+                    isFolder = False
 
         ### fix the size of the table
         if (
@@ -383,7 +462,9 @@ class Window(QMainWindow):
         f = "".join(file[1:]).replace('\n', '').split(';;')[:-1]
 
         for i in f:
-            element = i.split('::')
+            element = i.split('[[[[')
+            folder = element[0]
+            element = element[1].split('::')
             name = element[0]
             alias = name.split('--')
             name = alias[0]
@@ -397,23 +478,35 @@ class Window(QMainWindow):
             email = element[0]
             password = element[1]
 
+            self.name_to_folder[name] = folder
             self.name_list.append(name)
             self.name_to_alias[name] = alias
             self.name_to_ID[name] = identifiant
             self.name_to_email[name] = email
             self.name_to_password[name] = password
 
+        self.folderList = [i for i in list(set(self.name_to_folder.values())) if i != default_folder_name]
+        self.folder_to_list = {i: [] for i in self.folderList}
+        self.main_folderList = [i for i in self.name_list if self.name_to_folder[i] == default_folder_name]
+        for i in self.name_list:
+            if self.name_to_folder[i] != default_folder_name:
+                list_ = self.folder_to_list[self.name_to_folder[i]]
+                list_.append(i)
+                self.folder_to_list[self.name_to_folder[i]] = list_
+        # delete list_
+        # del list_
+
     def close_window(self, cross=False):
         if not cross:
             exitMessage = QMessageBox()
             exitMessage.setIcon(QMessageBox.Question)
             exitMessage.setWindowIcon(QIcon('resources/pama.ico'))
-            if self.language == 'french':
+            if self.language == french:
                 exitMessage.setWindowTitle('Quitter')
                 exitMessage.setText('Voulez-vous vraiment fermer la fenêtre ?')
                 exitMessage.addButton("&Oui", QMessageBox.YesRole)
                 exitMessage.addButton("&Non", QMessageBox.NoRole)
-            elif self.language == 'english':
+            elif self.language == english:
                 exitMessage.setWindowTitle('Exit')
                 exitMessage.setText('Do you really want to close the window ?')
                 exitMessage.addButton("&Yes", QMessageBox.YesRole)
@@ -458,16 +551,17 @@ class GetPassword:
         ### label
         self.label = QLabel(self.self)
         self.label.setFixedSize(175, 25)
-        self.label.move((self.self.width() - self.label.width())//2, 100)
+        self.label.move((self.self.width() - self.label.width()) // 2, 100)
         self.label.setFont(QFont('Arial', 9))
 
         ### password entry
         self.passwordEntry = QLineEdit(self.self)
         self.passwordEntry.setFocus()
         self.passwordEntry.setFixedSize(200, 30)
-        self.passwordEntry.move((self.self.width() - self.passwordEntry.width())//2, 150)
+        self.passwordEntry.move((self.self.width() - self.passwordEntry.width()) // 2, 150)
         self.passwordEntry.setEchoMode(QLineEdit.Password)
         self.passwordEntry.setStyleSheet(f'border: 1px solid #{bright_border};')
+        self.passwordEntry.insert("PaMa2.3") # retire mot de passe
         self.password_isVisible = False
         ## see / not to see
         self.is_visible = QPushButton(self.passwordEntry)
@@ -475,7 +569,7 @@ class GetPassword:
         self.is_visible.setCursor(Qt.ArrowCursor)
         self.is_visible.setStyleSheet('border: 0px;')
         self.is_visible.clicked.connect(self.visible)
-        self.is_visible.move(self.passwordEntry.width() - 30, self.passwordEntry.height()//4)
+        self.is_visible.move(self.passwordEntry.width() - 30, self.passwordEntry.height() // 4)
         ## alert label
         self.alert = QLabel(self.self)
         self.alert.setText('')
@@ -487,7 +581,7 @@ class GetPassword:
         ### confirm button
         self.confirmButton = QPushButton(self.self)
         self.confirmButton.setFixedSize(100, 30)
-        self.confirmButton.move((self.self.width() - self.confirmButton.width())//2, 200)
+        self.confirmButton.move((self.self.width() - self.confirmButton.width()) // 2, 200)
         self.confirmButton.released.connect(lambda: self.check_password())
         ## set the confirmButton shortcut
         self.shortcut = QShortcut(QKeySequence("Return"), self.self)
@@ -524,13 +618,12 @@ class GetPassword:
                 variables = load(file)
                 self.self.language = variables['language']
                 self.self.time = variables['time']
-                self.self.time = 250
                 self.self.theme = variables['theme']
                 file.close()
         except:
-            self.self.language = 'english'
+            self.self.language = english
             self.self.time = 250
-            self.self.theme = 'bright'
+            self.self.theme = bright
             variables = {'language': self.self.language, 'time': self.self.time, 'theme': self.self.theme}
             file = open('resources/variables.txt', "wb")
             dump(variables, file)
@@ -547,7 +640,9 @@ class GetPassword:
             self.password_isVisible = False
 
     def check_password(self):
+        # put everything back on the right StyleSheet
         self.passwordEntry.setStyleSheet(f'border: 1px solid #{bright_border};')
+
         passwordEntry = self.passwordEntry.text().replace(' ', '')
         run = True
         with open('files/password.txt', 'r') as f:
@@ -559,27 +654,28 @@ class GetPassword:
                 run = False
             f.close()
         if hashlib.sha3_512(passwordEntry.encode()).hexdigest() != password or run == False:
-            if self.tried >= 3:
+            if self.tried >= 2:
                 quit()
             else:
                 self.passwordEntry.clear()
                 self.passwordEntry.setStyleSheet(f'border-top: 1px solid #{bright_border};'
                                                  f'border-bottom: 2px solid #{bright_alert}; border-right: 1px solid #{bright_border}; border-left: 1px solid #{bright_border};')
-                if self.self.language == 'french':
+                if self.self.language == french:
                     self.alert.setText("Le mot de passe n'est pas correct")
-                elif self.self.language == 'english':
+                elif self.self.language == english:
                     self.alert.setText("The password is not correct")
             self.tried += 1
         else:
+            self.shortcut.deleteLater()
             seed = create_seed(passwordEntry)
             self.Window__init__(seed)
 
     def translate(self, language):
-        if language == 'french':
+        if language == french:
             self.self.setWindowTitle('PaMa')
             self.label.setText('Entrer votre mot de passe:')
             self.confirmButton.setText('Confirmer')
-        elif language == 'english':
+        elif language == english:
             self.self.setWindowTitle('PaMa')
             self.label.setText('Enter your password:')
             self.confirmButton.setText('Confirm')
@@ -656,11 +752,11 @@ class CreatePassword(QDialog):
         self.translate(self.main_self.language)
 
     def translate(self, language):
-        if language == 'french':
+        if language == french:
             self.setWindowTitle('PaMa - Créer le mot de passe')
             self.label.setText('Choisissez un mot de passe pour ce logiciel:')
             self.confirmButton.setText('Confirmer')
-        elif language == 'english':
+        elif language == english:
             self.setWindowTitle('PaMa - Create password')
             self.label.setText('Choose a password for this software:')
             self.confirmButton.setText('Confirm')
@@ -681,48 +777,52 @@ class CreatePassword(QDialog):
 
         if errorList:
             self.new_password.setStyleSheet(f'border-top: 1px solid #{bright_border};'
-                                             f'border-bottom: 2px solid #{bright_alert}; border-right: 1px solid #{bright_border}; border-left: 1px solid #{bright_border};')
-            if self.main_self.language == 'french':
-                self.alert.setText(f"Vous ne pouvez pas utiliser le{'s' if len(errorList) > 1 else ''} caractère{'s' if len(errorList) > 1 else ''} suivant: {''.join(errorList)}")
-            elif self.main_self.language == 'english':
-                self.alert.setText(f"You cannot use the following character{'s' if len(errorList) > 1 else ''}: {''.join(errorList)}")
+                                            f'border-bottom: 2px solid #{bright_alert}; border-right: 1px solid #{bright_border}; border-left: 1px solid #{bright_border};')
+            if self.main_self.language == french:
+                self.alert.setText(
+                    f"Vous ne pouvez pas utiliser le{'s' if len(errorList) > 1 else ''} caractère{'s' if len(errorList) > 1 else ''} suivant: {''.join(errorList)}")
+            elif self.main_self.language == english:
+                self.alert.setText(
+                    f"You cannot use the following character{'s' if len(errorList) > 1 else ''}: {''.join(errorList)}")
         elif passwordEntry in easy_password or search(r'(\d+([/\-|\\])\d+([/\-|\\])\d+)', passwordEntry) is not None:
-            if self.main_self.language == 'french':
+            if self.main_self.language == french:
                 self.alert.setText("Votre mot de passe est trop facile")
-            elif self.main_self.language == 'english':
+            elif self.main_self.language == english:
                 self.alert.setText("Your password is too easy")
         elif len(passwordEntry) <= 4:
-            if self.main_self.language == 'french':
+            if self.main_self.language == french:
                 self.alert.setText("Votre mot de passe doit contenir au moins 5 caractères")
-            elif self.main_self.language == 'english':
+            elif self.main_self.language == english:
                 self.alert.setText("Your password must contain at least 5 characters")
         elif search(r'(\d+)', passwordEntry) is None:
-            if self.main_self.language == 'french':
+            if self.main_self.language == french:
                 self.alert.setText("Votre mot de passe doit contenir au moins un chiffre")
-            elif self.main_self.language == 'english':
+            elif self.main_self.language == english:
                 self.alert.setText("Your password must contain at least one digit")
         elif search(r'([A-Z])', passwordEntry) is None:
-            if self.main_self.language == 'french':
+            if self.main_self.language == french:
                 self.alert.setText("Votre mot de passe doit contenir au moins une majuscule")
-            elif self.main_self.language == 'english':
+            elif self.main_self.language == english:
                 self.alert.setText("Your password must contain at least one capital letter")
         elif search(r'([a-z])', passwordEntry) is None:
-            if self.main_self.language == 'french':
+            if self.main_self.language == french:
                 self.alert.setText("Votre mot de passe doit contenir au moins une minuscule")
-            elif self.main_self.language == 'english':
+            elif self.main_self.language == english:
                 self.alert.setText("Your password must contain at least one lower case letter")
         else:
             confirmPassword = QMessageBox()
             confirmPassword.setIcon(QMessageBox.Critical)
             confirmPassword.setWindowIcon(QIcon('resources/pama.ico'))
-            if self.main_self.language == 'french':
+            if self.main_self.language == french:
                 confirmPassword.setWindowTitle('Enregistrer')
-                confirmPassword.setText("Voulez-vous valider votre mot de passe sachant qu'il sera irrécupérable si vous l'oubliez ?")
+                confirmPassword.setText(
+                    "Voulez-vous valider votre mot de passe sachant qu'il sera irrécupérable si vous l'oubliez ?")
                 confirmPassword.addButton("&Oui", QMessageBox.YesRole)
                 confirmPassword.addButton("&Non", QMessageBox.NoRole)
-            elif self.main_self.language == 'english':
+            elif self.main_self.language == english:
                 confirmPassword.setWindowTitle('Save')
-                confirmPassword.setText("Do you want to validate your password knowing that it will be unrecoverable if you forget it?")
+                confirmPassword.setText(
+                    "Do you want to validate your password knowing that it will be unrecoverable if you forget it?")
                 confirmPassword.addButton("&Yes", QMessageBox.YesRole)
                 confirmPassword.addButton("&No", QMessageBox.NoRole)
             confirmPassword.exec_()

@@ -1,20 +1,6 @@
-# variables:
-dark_color = 'CFCFCF'
-dark_background = '3D3D3D'
-dark_background_hover = '555555'
-dark_background_entry = '868686'
-dark_color_entry = '000000'
-dark_border = '777777'
-dark_entry_border = 'B6B6B6'
-dark_alert = 'FF5757'
-
-bright_background = 'F5F5F5'
-bright_background_hover = 'E0E0E0'
-bright_background_entry = 'D6D6D6'
-bright_border = '1F1F1F'
-selection_color = '7678FF'
-bright_alert = 'FF0000'
-bright_entry_border = '000000'
+from additions import dark, bright, \
+    bright_entry_border, bright_alert, dark_selection_background, dark_selection_color, bright_border, bright_background_entry, bright_background_hover, bright_background, bright_color, \
+    dark_alert, dark_entry_border, dark_border, dark_color_entry, dark_background_entry, dark_background_hover, dark_background, dark_color
 
 
 class SetTheme:
@@ -23,13 +9,13 @@ class SetTheme:
         self.self = main_self
 
     def dark(self):
-        self.self.theme = 'dark'
+        self.self.theme = dark
         self.self.background.setStyleSheet(
             f'background: #{dark_background};')
         self.self.searchBackground.setStyleSheet(
             f'color: #{dark_color_entry}; background: #{dark_background_entry}; border-radius: 4px;')
         self.self.searchBar.setStyleSheet(
-            f'color: #{dark_color_entry}; background: #{dark_background_entry}; border: 0px; selection-background-color: #{selection_color}; selection-color: #000000;')
+            f'color: #{dark_color_entry}; background: #{dark_background_entry}; border: 0px; selection-background-color: #{dark_selection_background}; selection-color: #{dark_selection_color};')
         self.self.searchResults.setStyleSheet(
             f'color: #{dark_color}; background: #{dark_background}; border-top: 0px solid #{dark_border};'
             f'border-bottom: 0px solid #{dark_border}; border-right: 1px solid #{dark_border}; border-left: 0px solid #{dark_border};')
@@ -38,9 +24,11 @@ class SetTheme:
             f'border-bottom: 0px solid #{dark_border}; border-right: 1px solid #{dark_border}; border-left: 0px solid #{dark_border};')
         self.self.table.setStyleSheet(
             f'color: #{dark_color}; background: #{dark_background}; border: 0px; gridline-color: #{dark_border};')
+        self.self.progress_bar.setStyleSheet(
+            'QProgressBar {border: 1px solid #' + dark_border + '; border-radius: 4px; text-align: center; background-color: #' + dark_background + '; color: #' + dark_color + '} QProgressBar::chunk{background-color: #1060B4; width: 1px;}')
 
     def bright(self):
-        self.self.theme = 'bright'
+        self.self.theme = bright
         self.self.background.setStyleSheet(
             f'background: #{bright_background};')
         self.self.searchBackground.setStyleSheet(
@@ -55,3 +43,5 @@ class SetTheme:
             f'border-right: 1px solid #{bright_border}; border-left: 0px solid #{bright_border};')
         self.self.table.setStyleSheet(
             f'background: #{bright_background}; border: 0px; gridline-color: #{bright_border};')
+        self.self.progress_bar.setStyleSheet(
+            'QProgressBar {border: 1px solid #' + bright_border + '; border-radius: 4px; text-align: center; background-color: #' + bright_background + '; color: #' + bright_color + '} QProgressBar::chunk{background-color: #79D53B; width: 1px;}')

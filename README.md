@@ -1,7 +1,7 @@
 # Français
 *Ce dépôt n'a pas vocation à évoluer*
 
-## Attention !
+## ATTENTION !
 > **Cette version de PaMa n'est pas conçu par des professionnels. Par concéquant, des erreurs peuvent persister et par concéquent atteindre à la sécurité des données sauvegardés.**
 
 ## PaMa

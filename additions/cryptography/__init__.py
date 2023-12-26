@@ -3,4 +3,4 @@
 ########################################################################################################################
 
 # imports
-from .cryptography_ import convert_bin_txt, convert_txt_bin, create_seed, alpha, alpha_simple
+from .cryptography_ import convert_bin_txt, convert_txt_bin, create_seed, alpha, alpha_simple, dico_char_int

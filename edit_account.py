@@ -198,80 +198,69 @@ class EditAccount(QDialog):
         ### focus on new_accName
         self.new_accName.setFocus()
 
-    def add_folder(self):
-        # AddFolder(self, self.main_self.language, self.main_self.theme).exec_()
-        # if len(self.folderList_copy) - 1 == self.len_folderList:
-        #     self.choose_folderComboBox.setCurrentIndex(0)
-        # else:
-        #     self.choose_folderComboBox.setCurrentIndex(len(self.folderList_copy)-1)
-        pass
-
     def try_save_accountInformations(self):
-        new_accList = [self.new_accName, self.new_accAlias, self.new_accID, self.new_accEmail, self.new_accPassword]
-        new_accErrorList = [self.new_accNameError, self.new_accAliasError, self.new_accIDError, self.new_accEmailError,
+        new_acc_list = [self.new_accName, self.new_accAlias, self.new_accID, self.new_accEmail, self.new_accPassword]
+        new_acc_error_list = [self.new_accNameError, self.new_accAliasError, self.new_accIDError, self.new_accEmailError,
                             self.new_accPasswordError]
 
-        ### reset the correct StyleSheet on all entries
+        # reset the correct StyleSheet on all entries
         if self.main_self.theme == dark:
-            for i in new_accList:
+            for i in new_acc_list:
                 i.setStyleSheet(
                     f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
 
         elif self.main_self.theme == bright:
-            for i in new_accList:
+            for i in new_acc_list:
                 i.setStyleSheet(
                     f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')
 
-        ### reset error messages
-        for i in new_accErrorList:
+        # reset error messages
+        for i in new_acc_error_list:
             i.setText('')
 
-        ### retrieve keystrokes and put them in variables
-        # new_folder = self.choose_folderComboBox.currentText()
-        # if new_folder == "":
-        #     new_folder = default_folder_name
-        new_name = self.new_accName.text().replace(' ', '')
-        new_alias = self.new_accAlias.text().replace(' ', '')
-        new_id = self.new_accID.text().replace(' ', '')
+        # retrieve keystrokes and put them in variables
+        new_name = self.new_accName.text()
+        new_alias = self.new_accAlias.text()
+        new_id = self.new_accID.text()
         new_email = self.new_accEmail.text().replace(' ', '')
         new_password = self.new_accPassword.text().replace(' ', '')
 
-        new_List = [new_name, new_alias, new_id, new_email, new_password]
-        new_List_plus = [new_name, new_alias, new_id, new_email, new_password]
-        List_plus = [self.accName, self.accAlias, self.accID, self.accEmail, self.accPassword]
+        new_list = [new_name, new_alias, new_id, new_email, new_password]
+        new_list_plus = [new_name, new_alias, new_id, new_email, new_password]
+        list_plus = [self.accName, self.accAlias, self.accID, self.accEmail, self.accPassword]
         run = False
-        for i in range(len(new_List_plus)):
-            if new_List_plus[i] != List_plus[i]:
+        for i in range(len(new_list_plus)):
+            if new_list_plus[i] != list_plus[i]:
                 run = True
 
         if run:
-            ### create error_list that contains all non-encryptable characters and delete duplicates with set()
-            error_list = list(set(i for i in new_name + new_alias + new_id + new_email + new_password if not i in alpha))
-            ### create a list for each QLineEdit
-            new_ErrorList = [[], [], [], [], []]
+            # create error_list that contains all non-encrypt-able characters and delete duplicates with set()
+            error_list = list(set(i for i in "".join(new_list) if i not in alpha))
+            # create a list for each QLineEdit
+            new_error_list = [[], [], [], [], []]
 
             if error_list:
                 for i in error_list:
-                    for j in range(len(new_List)):
-                        if i in new_List[j]:
+                    for j in range(len(new_list)):
+                        if i in new_list[j]:
                             if self.main_self.theme == dark:
-                                new_accList[j].setStyleSheet(
+                                new_acc_list[j].setStyleSheet(
                                     f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
                             elif self.main_self.theme == bright:
-                                new_accList[j].setStyleSheet(
+                                new_acc_list[j].setStyleSheet(
                                     f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
-                            new_ErrorList[j].append(i)
+                            new_error_list[j].append(i)
                 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 if self.main_self.language == french:
-                    for i in range(len(new_ErrorList)):
-                        if new_ErrorList[i]:
-                            new_accErrorList[i].setText(
-                                f'Vous ne pouvez pas utiliser le{"s" if len(new_ErrorList[i]) > 1 else ""} caractère{"s" if len(new_ErrorList[i]) > 1 else ""}: {"".join(new_ErrorList[i])}!')
+                    for i in range(len(new_error_list)):
+                        if new_error_list[i]:
+                            new_acc_error_list[i].setText(
+                                f'Vous ne pouvez pas utiliser le{"s" if len(new_error_list[i]) > 1 else ""} caractère{"s" if len(new_error_list[i]) > 1 else ""}: {"".join(new_error_list[i])}!')
                 elif self.main_self.language == english:
-                    for i in range(len(new_ErrorList)):
-                        if new_ErrorList[i]:
-                            new_accErrorList[i].setText(
-                                f'You cannot use the character{"s" if len(new_ErrorList[i]) > 1 else ""}: {"".join(new_ErrorList[i])}!')
+                    for i in range(len(new_error_list)):
+                        if new_error_list[i]:
+                            new_acc_error_list[i].setText(
+                                f'You cannot use the character{"s" if len(new_error_list[i]) > 1 else ""}: {"".join(new_error_list[i])}!')
             # //////////////////////////////////////////////////////////////////////////////////////////////////////////
             elif '--' in new_name or '--' in new_alias or '--' in new_id or '--' in new_email or '--' in new_password or \
                     '::' in new_name or '::' in new_alias or '::' in new_id or '::' in new_email or '::' in new_password or \
@@ -283,16 +272,16 @@ class EditAccount(QDialog):
                 elif self.main_self.language == english:
                     message = "You cannot use '::', '//', '%%' or ';;'."
                 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                for i in range(len(new_List)):
-                    if '--' in new_List[i] or '::' in new_List[i] or '//' in new_List[i] or '%%' in new_List[i] or ';;' in new_List[i]:
+                for i in range(len(new_list)):
+                    if '--' in new_list[i] or '::' in new_list[i] or '//' in new_list[i] or '%%' in new_list[i] or ';;' in new_list[i]:
                         if self.main_self.theme == dark:
-                            new_accList[i].setStyleSheet(
+                            new_acc_list[i].setStyleSheet(
                                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
-                            new_accErrorList[i].setText(message)
+                            new_acc_error_list[i].setText(message)
                         elif self.main_self.theme == bright:
-                            new_accList[i].setStyleSheet(
+                            new_acc_list[i].setStyleSheet(
                                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
-                            new_accErrorList[i].setText(message)
+                            new_acc_error_list[i].setText(message)
             # //////////////////////////////////////////////////////////////////////////////////////////////////////////
             elif new_name == '' or new_password == '':
                 if not new_name:
@@ -346,36 +335,6 @@ class EditAccount(QDialog):
                     self.new_accAliasError.setText('Le nom est déjà pris...')
                 elif self.main_self.language == english:
                     self.new_accAliasError.setText('The name is already taken...')
-            # //////////////////////////////////////////////////////////////////////////////////////////////////////////
-            # elif new_folder == new_name or new_folder == new_alias:
-            #     if new_folder == new_name:
-            #         if self.main_self.theme == dark:
-            #             self.new_accName.setStyleSheet(
-            #                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
-            #         elif self.main_self.theme == bright:
-            #             self.new_accName.setStyleSheet(
-            #                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
-            #         # ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
-            #         if self.main_self.language == french:
-            #             self.new_accNameError.setText(
-            #                 'Le nom du compte ne peut pas être le même que le nom du dossier')
-            #         elif self.main_self.language == english:
-            #             self.new_accNameError.setText('The account name cannot be the same as the folder name')
-            #     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            #     else:
-            #         if self.main_self.theme == dark:
-            #             self.new_accAlias.setStyleSheet(
-            #                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
-            #         elif self.main_self.theme == bright:
-            #             self.new_accAlias.setStyleSheet(
-            #                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
-            #         # ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
-            #         if self.main_self.language == french:
-            #             self.new_accAliasError.setText(
-            #                 "Le nom de l'alias ne peut pas être le même que le nom du dossier")
-            #         elif self.main_self.language == english:
-            #             self.new_accAliasError.setText('The alias name cannot be the same as the folder name')
-            # ##########################################################################################################
             else:
                 exitMessage = QMessageBox()
                 exitMessage.setIcon(QMessageBox.Question)
@@ -396,6 +355,10 @@ class EditAccount(QDialog):
                         file = f.readlines()
                         f.close()
                     file = [convert_bin_txt(i, self.main_self.seed) for i in file]
+
+                    line: int = 0
+                    end_line: int = 0
+
                     for i in range(len(file)):
                         if file[i] == self.accName + '--' or file[i] == self.accName + '::':
                             line = i
@@ -409,11 +372,8 @@ class EditAccount(QDialog):
                         [f.write(convert_txt_bin(i, self.main_self.seed) + '\n') for i in file]
                         f.close()
                     with open('files/password.txt', 'a') as f:
-                        if new_alias != ['']:
-                            f.write(convert_txt_bin(new_name + '--', self.main_self.seed) + '\n')
-                            f.write(convert_txt_bin("".join(new_alias) + '::', self.main_self.seed) + '\n')
-                        else:
-                            f.write(convert_txt_bin(new_name + '::', self.main_self.seed) + '\n')
+                        f.write(convert_txt_bin(new_alias + '--', self.main_self.seed) + '\n')
+                        f.write(convert_txt_bin(new_name + '::', self.main_self.seed) + '\n')
                         f.write(convert_txt_bin(new_id + '//', self.main_self.seed) + '\n')
                         f.write(convert_txt_bin(new_email + '%%', self.main_self.seed) + '\n')
                         f.write(convert_txt_bin(new_password + ';;', self.main_self.seed) + '\n')
@@ -454,12 +414,6 @@ class EditAccount(QDialog):
     def setTheme(self, theme):
         if theme == dark:
             self.background.setStyleSheet(f'background: #{dark_background};')
-            # ### add folder
-            # self.choose_folderLabel.setStyleSheet(f'color: #{dark_color}')
-            # self.choose_folderComboBox.setStyleSheet(f'color: #{dark_color};')
-            # self.add_folderButton.setStyleSheet(
-            #     'QPushButton{background: #' + dark_background + '; color: #' + dark_color + '; border: 1px solid #' + dark_border + '; border-radius: 2px;}' +
-            #     'QPushButton:hover{background: #' + dark_background_hover + ';}')
             ### account name
             self.new_accName_label.setStyleSheet(f'color: #{dark_color}')
             self.new_accName.setStyleSheet(
@@ -497,12 +451,6 @@ class EditAccount(QDialog):
 
         elif theme == bright:
             self.background.setStyleSheet(f'background: #{bright_background};')
-            ### add folder
-            # self.choose_folderLabel.setStyleSheet(f'color: #{bright_color}')
-            # self.choose_folderComboBox.setStyleSheet(f'color: #{bright_color};')
-            # self.add_folderButton.setStyleSheet(
-            #     'QPushButton{background: #' + bright_background + '; border: 1px solid #' + bright_border + '; border-radius: 2px;}' +
-            #     'QPushButton:hover{background: #' + bright_background_hover + ';}')
             ### account name
             self.new_accName.setStyleSheet(
                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px;')

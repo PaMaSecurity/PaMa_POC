@@ -17,7 +17,8 @@ try:
 	from settings import WindowSettings
 	from add_account import AddAccount
 	from edit_account import EditAccount
-except:
+	from delete_account import delete
+except ImportError:
 	start = False
 
 
@@ -32,7 +33,7 @@ class Window(QMainWindow):
 
 			# create dictionary
 			self.name_list: list[str] = []
-			self.liste: list[str] = []
+			self.liste: list[list[str]] = []
 			self.alias_list: list[str] = []
 			self.email_list: list[str] = []
 			self.items: list[QTreeWidgetItem] = []
@@ -248,55 +249,6 @@ class Window(QMainWindow):
 		self.ctrl = False
 		WindowSettings(self).exec_()
 
-	def delete(self, index):
-		# Message Box asks a confirmation
-		account_name = self.liste[index][0]
-		delete_accountQMessageBox = QMessageBox()
-		delete_accountQMessageBox.setIcon(QMessageBox.Question)
-		delete_accountQMessageBox.setWindowIcon(QIcon('resources/pama.ico'))
-		if self.language == french:
-			delete_accountQMessageBox.setWindowTitle('Supprimer')
-			delete_accountQMessageBox.setText(f'Voulez-vous vraiment supprimer le compte {account_name}?')
-			delete_accountQMessageBox.addButton("&Oui", QMessageBox.YesRole)
-			delete_accountQMessageBox.addButton("&Non", QMessageBox.NoRole)
-		elif self.language == english:
-			delete_accountQMessageBox.setWindowTitle('Delete')
-			delete_accountQMessageBox.setText(f'Do you really want to delete the {account_name} account?')
-			delete_accountQMessageBox.addButton("&Yes", QMessageBox.YesRole)
-			delete_accountQMessageBox.addButton("&No", QMessageBox.NoRole)
-		delete_accountQMessageBox.exec_()
-
-		# Deletes the account
-		if (delete_accountQMessageBox.clickedButton().text() == '&Yes' or
-				delete_accountQMessageBox.clickedButton().text() == '&Oui'):
-			with open('files/password.txt', 'r') as f:
-				file = f.readlines()
-				f.close()
-			file = [convert_bin_txt(i, self.seed) for i in file]
-
-			line: int = 0
-			end_line: int = 0
-
-			for i in range(len(file)):
-				if file[i] == account_name + '::' or file[i] == self.liste[index][1] + '--':
-					line: int = i
-					for j in range(i, len(file)):
-						if ';;' in file[j]:
-							end_line = j + 1
-							break
-			for i in range(line, end_line):
-				del file[line]
-			with open('files/password.txt', 'w') as f:
-				[f.write(convert_txt_bin(i, self.seed) + '\n') for i in file]
-
-			# updates dicts and lists
-			self.name_list.remove(account_name)
-			self.alias_list.remove(self.liste[index][1])
-			self.email_list.remove(self.liste[index][3])
-			self.liste.remove(self.liste[index])
-			self.data_in_table(self)
-			self.search()
-
 	def rightClickAction(self, index):
 		self.rightClickMenu = QMenuClose(self, 5)
 		self.rightClickMenu.setAttribute(Qt.WA_TranslucentBackground)
@@ -417,14 +369,10 @@ class Window(QMainWindow):
 		f = "".join(file[1:]).replace('\n', '').split(';;')[:-1]
 
 		for i in f:
-			element = i.split('::')
+			element = i.split('--')
+			alias = element[0]
+			element = element[1].split('::')
 			name = element[0]
-			alias = name.split('--')
-			name = alias[0]
-			try:
-				alias = alias[1]
-			except:
-				alias = ''
 			element = element[1].split("//")
 			identifiant = element[0]
 			element = element[1].split('%%')
@@ -435,8 +383,6 @@ class Window(QMainWindow):
 			self.name_list.append(name)
 			self.alias_list.append(alias)
 			self.email_list.append(email)
-		# delete list_
-		# del list_
 
 	def close_window(self, cross=False):
 		if not cross:

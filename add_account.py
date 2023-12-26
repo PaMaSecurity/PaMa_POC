@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QFrame, QLabel, QLineEdit, QPushButton, QMessageBox, QApplication, QCompleter
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QIcon
 from additions.constants import *
 from additions.cryptography import *
 import random
@@ -34,34 +34,6 @@ class AddAccount(QDialog):
         self.background.setStyleSheet('background: #ffffff;')
         self.background.setFixedSize(self.width(), self.height())
         self.background.move(0, 0)
-
-        # ### Folder
-        # ## choose_folderLabel
-        # self.choose_folderLabel = QLabel(self)
-        # self.choose_folderLabel.setFont(self.fontLabel)
-        # self.choose_folderLabel.move(10, 10)
-        # ## choose_folderComboBox
-        # """QComboBox
-        # utiliser le folderList_copy dans le QComboBox
-        # pour que, lorsqu'on ajoute un nouveau fichier, on l'ajoute dans folderList_copy pour ne pas modifier folderList du main
-        # """
-        # self.choose_folderComboBox = QComboBox(self.background)
-        # self.choose_folderComboBox.activated.connect(lambda: self.choose_folderComboBox.clearFocus())
-        # self.choose_folderComboBox.setFixedSize(100, 25)
-        # self.choose_folderComboBox.move(self.choose_folderLabel.geometry().x(), self.choose_folderLabel.geometry().y() + 30)
-        # # self.choose_folderComboBox.addItems(self.folderList_copy)
-        # # self.choose_folderComboBox.setPlaceholderText("Choisissez le dossier")
-        # ## add_folderButton
-        # self.add_folderButton = QPushButton(self)
-        # self.add_folderButton.setFont(self.fontEntry)
-        # self.add_folderButton.setFixedSize(120, 25)
-        # self.add_folderButton.clicked.connect(self.add_folder)
-        # self.add_folderButton.move(self.choose_folderComboBox.width()+self.choose_folderComboBox.geometry().x()+10, self.choose_folderLabel.geometry().y() + 30)
-        # ## choose_folderError
-        # self.choose_folderError = QLabel(self)
-        # self.choose_folderError.setFont(self.fontError)
-        # self.choose_folderError.setFixedWidth(300)
-        # self.choose_folderError.move(self.choose_folderLabel.geometry().x(), self.add_folderButton.geometry().y() + 28)
 
         ### New account name
         ## new_accName_label
@@ -187,14 +159,6 @@ class AddAccount(QDialog):
         ### focus on new_accName
         self.new_accName.setFocus()
 
-    def add_folder(self):
-        # AddFolder(self, self.main_self.language, self.main_self.theme).exec_()
-        # if len(self.folderList_copy) - 1 == self.len_folderList:
-        #     self.choose_folderComboBox.setCurrentIndex(0)
-        # else:
-        #     self.choose_folderComboBox.setCurrentIndex(len(self.folderList_copy)-1)
-        pass
-
     def try_save_accountInformations(self):
         new_accList = [self.new_accName, self.new_accAlias, self.new_accID, self.new_accEmail, self.new_accPassword]
         new_accErrorList = [self.new_accNameError, self.new_accAliasError, self.new_accIDError, self.new_accEmailError,
@@ -215,20 +179,17 @@ class AddAccount(QDialog):
         for i in new_accErrorList:
             i.setText('')
 
-        # ### retrieve keystrokes and put them in variables
-        # new_folder = self.choose_folderComboBox.currentText()
-        # if new_folder == "":
-        #     new_folder = default_folder_name
-        new_name = self.new_accName.text().replace(' ', '')
-        new_alias = self.new_accAlias.text().replace(' ', '')
-        new_id = self.new_accID.text().replace(' ', '')
+        # retrieve keystrokes and put them in variables
+        new_name = self.new_accName.text()
+        new_alias = self.new_accAlias.text()
+        new_id = self.new_accID.text()
         new_email = self.new_accEmail.text().replace(' ', '')
         new_password = self.new_accPassword.text().replace(' ', '')
 
         new_List = [new_name, new_alias, new_id, new_email, new_password]
 
         ### create error_list that contains all non-encryptable characters and delete duplicates with set()
-        error_list = list(set(i for i in new_name + new_alias + new_id + new_email + new_password if not i in alpha))
+        error_list = list(set(i for i in "".join(new_List) if i not in dico_char_int.keys()))
 
         ### create a list for each QLineEdit
         new_ErrorList = [[], [], [], [], []]
@@ -330,12 +291,9 @@ class AddAccount(QDialog):
             elif self.main_self.language == english:
                 self.new_accAliasError.setText('The name is already taken...')
         else:
-            with open('files/password.txt', 'a') as f:
-                if new_alias != '':
-                    f.write(convert_txt_bin(new_name + '--', self.main_self.seed) + '\n')
-                    f.write(convert_txt_bin(new_alias + '::', self.main_self.seed) + '\n')
-                else:
-                    f.write(convert_txt_bin(new_name + '::', self.main_self.seed) + '\n')
+            with open('files/password.txt', 'a', encoding='utf-8') as f:
+                f.write(convert_txt_bin(new_alias + '--', self.main_self.seed) + '\n')
+                f.write(convert_txt_bin(new_name + '::', self.main_self.seed) + '\n')
                 f.write(convert_txt_bin(new_id + '//', self.main_self.seed) + '\n')
                 f.write(convert_txt_bin(new_email + '%%', self.main_self.seed) + '\n')
                 f.write(convert_txt_bin(new_password + ';;', self.main_self.seed) + '\n')

@@ -391,11 +391,11 @@ class AddAccount(QDialog):
             self.close()
 
     def generatePassword(self):
-        characters = list(alpha)
+        characters = list(alpha_simple)
         random.seed()
         random.shuffle(characters)
         password_ = ""
-        for i in range(30):
+        for i in range(40):
             password_ += random.choice(characters)
         if '--' in password_ or '::' in password_ or '//' in password_ or '%%' in password_ or ';;' in password_:
             password_ = ""

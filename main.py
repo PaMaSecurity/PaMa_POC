@@ -11,43 +11,43 @@ class Window(QMainWindow):
         if not self.close_:
             application.aboutToQuit.connect(lambda: self.close_window(cross=True))
 
-            ## create dictionary
+            # create dictionary
             self.name_list: list[str] = []
             self.liste: list[str] = []
             self.alias_list: list[str] = []
             self.email_list: list[str] = []
             self.items: list[QTreeWidgetItem] = []
 
-            ## ctrl
+            # ctrl
             self.ctrl = False
-            ## load variables
+            # load variables
             self.read_txt()
-            ## build the window
+            # build the window
             self.build()
         else:
             quit()
 
     def build(self):
-        ### Window
-        ## set a fixed size to the window
+        # Window
+        # set a fixed size to the window
         self.setMinimumSize(710, 400)
         self.resize(self.screen().geometry().width() - 400, self.screen().geometry().height() - 300)
-        ## move the window
+        # move the window
         self.move((self.screen().geometry().width() - self.width()) // 2,
                   (self.screen().geometry().height() - self.height()) // 2 - 100)
-        ## background
+        # background
         self.background = QFrame(self)
         self.background.resize(self.width(), self.height())
         self.background.move(0, 0)
-        ## add an icon to the window
+        # add an icon to the window
         self.setWindowIcon(QIcon('resources/pama.ico'))
 
-        ### status_bar
+        # status_bar
         self.status_bar = self.statusBar()
         self.status_bar.setSizeGripEnabled(False)
 
-        ### Menu
-        ## fileMenu
+        # Menu
+        # fileMenu
         self.fileMenu = self.menuBar().addMenu('File')
         # fileMenu/file/settings
         self.settingsButton = QAction(self)
@@ -60,14 +60,14 @@ class Window(QMainWindow):
         self.exitButton.setShortcut('Ctrl+Q')
         self.exitButton.triggered.connect(self.close_window)
         self.fileMenu.addAction(self.exitButton)
-        ## AddAccountMenu
+        # AddAccountMenu
         self.addMenu = self.menuBar().addMenu('Add...')
         # add an account
         self.addAccountButton = QAction(self)
         self.addAccountButton.setShortcut('Ctrl++')
         self.addAccountButton.triggered.connect(self.addAccount)
         self.addMenu.addAction(self.addAccountButton)
-        ## helpMenu
+        # helpMenu
         self.helpMenu = self.menuBar().addMenu('Help')
         # helpMenu
         self.helpButton = QAction(self)
@@ -75,44 +75,44 @@ class Window(QMainWindow):
         self.helpButton.triggered.connect(self.help)
         self.helpMenu.addAction(self.helpButton)
 
-        ### Search bar
-        ## search result
+        # Search bar
+        # search result
         self.searchResults = QListWidgetClick(self)
         self.searchResults.move(0, 100)
         self.searchResults.resize(200, self.height() - 100)
-        self.searchResults.itemClicked.connect(self.searchResultAction)
-        ## first background
+        self.searchResults.itemClicked.connect(self.search_result_action)
+        # first background
         self.searchFirstBackground = QFrame(self)
         self.searchFirstBackground.setFixedSize(self.searchResults.width(), 55)
         self.searchFirstBackground.move(self.searchResults.x(),
                                         self.searchResults.y() - self.searchFirstBackground.height())
-        ## background
+        # background
         self.searchBackground = QFrame(self)
         self.searchBackground.resize(180, 36)
         self.searchBackground.move(8, 54)
-        ## search bar icon
+        # search bar icon
         self.searchBarIcon = QLabel(self)
         searchIcon = QPixmap('resources/search_icon.svg')
         self.searchBarIcon.setPixmap(searchIcon)
         self.searchBarIcon.setGeometry(16, 64, searchIcon.width(), searchIcon.height())
-        ## search bar QLineEdit
+        # search bar QLineEdit
         self.searchBar = QLineEdit(self)
         self.searchBar.setFixedSize(140, 25)
         self.searchBar.textChanged.connect(self.search)
         self.searchBar.move(40, 60)
 
-        ### QTreeWidget
-        ## create tree
+        # QTreeWidget
+        # create tree
         self.tree = QTreeWidgetRight(self, self.items)
-        ## resize the tree
+        # resize the tree
         self.tree.resize(self.width() - self.searchResults.width(), self.height() - 50 - self.status_bar.height())
         self.tree.header().setSectionResizeMode(QHeaderView.Fixed)
         self.tree.header().setDragEnabled(False)
-        ## move the tree
+        # move the tree
         self.tree.move(self.searchResults.width(), 50)
-        ## set the tree font
+        # set the tree font
         self.tree.setFont(tree_font)
-        ## set the Header's size
+        # set the Header's size
         self.tree.setColumnWidth(0, self.tree.width() // 100 * 20)
         self.tree.setColumnWidth(1, self.tree.width() // 100 * 20)
         self.tree.setColumnWidth(2, self.tree.width() // 100 * 25)
@@ -122,36 +122,36 @@ class Window(QMainWindow):
         self.tree.itemRightClicked.connect(self.rightClickAction)
         self.data_in_table(self)
 
-        ### Translate
+        # Translate
         self.translate(self.language)
 
-        ### Progress Bar
+        # Progress Bar
         self.progress_bar = QProgressBar(self)
         self.status_bar.addPermanentWidget(self.progress_bar)
 
-        ### setTheme
+        # setTheme
         self.setTheme(self.theme)
 
-        ### credis
+        # credis
         self.credis = QLabel(self)
         self.credis.setFont(QFont('Arial', 7))
         self.credis.setFixedSize(105, 20)
         self.credis.setText('PaMa 2.3 Elie Ruggiero')
         self.credis.move(self.width() - self.credis.width(), self.credis.height())
 
-        ### shortcuts
+        # shortcuts
         self.maj_1 = QShortcut(QKeySequence("Shift+&"), self)
         self.maj_1.activated.connect(self.resetSizes)
 
-        ### display window
+        # display window
         self.show()
 
-        ### Timer
+        # Timer
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.show_time)
         self.update_timer = False
 
-        ### Progress Bar
+        # Progress Bar
         self.progress_bar.setFixedSize(230, 30)
         self.progress_bar.setRange(0, self.time)
         self.count = self.time
@@ -230,29 +230,37 @@ class Window(QMainWindow):
         WindowSettings(self).exec_()
 
     def delete(self, index):
-        accountName = self.liste[index][0]
+        # Message Box asks a confirmation
+        account_name = self.liste[index][0]
         delete_accountQMessageBox = QMessageBox()
         delete_accountQMessageBox.setIcon(QMessageBox.Question)
         delete_accountQMessageBox.setWindowIcon(QIcon('resources/pama.ico'))
         if self.language == french:
             delete_accountQMessageBox.setWindowTitle('Supprimer')
-            delete_accountQMessageBox.setText(f'Voulez-vous vraiment supprimer le compte {accountName}?')
+            delete_accountQMessageBox.setText(f'Voulez-vous vraiment supprimer le compte {account_name}?')
             delete_accountQMessageBox.addButton("&Oui", QMessageBox.YesRole)
             delete_accountQMessageBox.addButton("&Non", QMessageBox.NoRole)
         elif self.language == english:
             delete_accountQMessageBox.setWindowTitle('Delete')
-            delete_accountQMessageBox.setText(f'Do you really want to delete the {accountName} account?')
+            delete_accountQMessageBox.setText(f'Do you really want to delete the {account_name} account?')
             delete_accountQMessageBox.addButton("&Yes", QMessageBox.YesRole)
             delete_accountQMessageBox.addButton("&No", QMessageBox.NoRole)
         delete_accountQMessageBox.exec_()
-        if delete_accountQMessageBox.clickedButton().text() == '&Yes' or delete_accountQMessageBox.clickedButton().text() == '&Oui':
+
+        # Deletes the account
+        if (delete_accountQMessageBox.clickedButton().text() == '&Yes' or
+                delete_accountQMessageBox.clickedButton().text() == '&Oui'):
             with open('files/password.txt', 'r') as f:
                 file = f.readlines()
                 f.close()
             file = [convert_bin_txt(i, self.seed) for i in file]
+
+            line: int = 0
+            end_line: int = 0
+
             for i in range(len(file)):
-                if file[i] == accountName + '::' or file[i] == self.liste[index][1] + '--':
-                    line = i
+                if file[i] == account_name + '::' or file[i] == self.liste[index][1] + '--':
+                    line: int = i
                     for j in range(i, len(file)):
                         if ';;' in file[j]:
                             end_line = j + 1
@@ -262,8 +270,8 @@ class Window(QMainWindow):
             with open('files/password.txt', 'w') as f:
                 [f.write(convert_txt_bin(i, self.seed) + '\n') for i in file]
 
-            # dicos and lists update
-            self.name_list.remove(accountName)
+            # updates dicts and lists
+            self.name_list.remove(account_name)
             self.alias_list.remove(self.liste[index][1])
             self.email_list.remove(self.liste[index][3])
             self.liste.remove(self.liste[index])
@@ -300,7 +308,7 @@ class Window(QMainWindow):
         self.rightClickMenu.popup(QCursor.pos())
         self.rightClickMenu.closeSignal.connect(lambda: self.items[index].setSelected(False))
 
-    def searchResultAction(self, item: QListWidgetItemIndex):
+    def search_result_action(self, item: QListWidgetItemIndex):
         if item.text() == 'See all' or item.text() == 'Tout voir':
             for i in range(len(self.liste)):
                 self.items[i].setHidden(False)
@@ -451,57 +459,57 @@ class GetPassword(QDialog):
         super().__init__()
         self.main_self = main_self
         self.main_self.close_ = True
-        ### set language
+        # set language
         self.tried = 0
-        ### load variables
+        # load variables
         self.load_variables()
-        ### create window
+        # create window
         self.build()
 
     def build(self):
-        ### Window
-        ## give a size to the window
+        # Window
+        # give a size to the window
         self.setMinimumSize(400, 400)
         self.resize(700, 600)
-        ## add an icon to the window
+        # add an icon to the window
         self.setWindowIcon(QIcon('resources/pama.ico'))
 
-        ### label
+        # label
         self.label = QLabel(self)
         self.label.adjustSize()
         self.label.setFont(QFont('Arial', 9))
 
-        ### password entry
+        # password entry
         self.passwordEntry = QLineEdit(self)
         self.passwordEntry.setFocus()
         self.passwordEntry.setFixedSize(200, 30)
         self.passwordEntry.setEchoMode(QLineEdit.Password)
         self.passwordEntry.setStyleSheet(f'border: 1px solid #{bright_border};')
         self.password_isVisible = False
-        ## see / not to see
+        # see / not to see
         self.is_visible = QPushButton(self.passwordEntry)
         self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
         self.is_visible.setCursor(Qt.ArrowCursor)
         self.is_visible.setStyleSheet('border: 0px;')
         self.is_visible.clicked.connect(self.visible)
         self.is_visible.move(self.passwordEntry.width() - 30, self.passwordEntry.height() // 4)
-        ## alert label
+        # alert label
         self.alert = QLabel(self)
         self.alert.setText('')
         self.alert.setFont(QFont('Arial Nova Light', 8))
         self.alert.setFixedWidth(300)
         self.alert.setStyleSheet(f'color: #{bright_alert}')
 
-        ### confirm button
+        # confirm button
         self.confirmButton = QPushButton(self)
         self.confirmButton.setFixedSize(100, 30)
         self.confirmButton.move((self.width() - self.confirmButton.width()) // 2, 200)
         self.confirmButton.released.connect(lambda: self.check_password())
-        ## set the confirmButton shortcut
+        # set the confirmButton shortcut
         self.shortcut = QShortcut(QKeySequence("Return"), self)
         self.shortcut.activated.connect(lambda: self.check_password())
 
-        ### translate
+        # translate
         self.translate(self.language)
 
         self.valide = True
@@ -519,7 +527,7 @@ class GetPassword(QDialog):
                     self.valide = False
                     CreatePassword(self).exec_()
 
-        ### display window
+        # display window
         if self.valide:
             self.show()
             del self.valide
@@ -614,7 +622,7 @@ class CreatePassword(QDialog):
 
     def __init__(self, main_self):
         super().__init__(None, Qt.WindowCloseButtonHint | Qt.WindowTitleHint)
-        ### make the window modal
+        # make the window modal
         self.setWindowModality(Qt.ApplicationModal)
         self.main_self = main_self
         self.build()
@@ -623,13 +631,13 @@ class CreatePassword(QDialog):
         self.setFixedSize(500, 500)
         self.setWindowIcon(QIcon('resources/pama.ico'))
 
-        ### label
+        # label
         self.label = QLabel(self)
         self.label.setFixedSize(247, 25)
         self.label.move((self.width() - self.label.width()) // 2, 100)
         self.label.setFont(QFont('Arial', 9))
 
-        ### password entry
+        # password entry
         self.new_password = QLineEdit(self)
         self.new_password.setFocus()
         self.new_password.setFixedSize(200, 30)
@@ -637,14 +645,14 @@ class CreatePassword(QDialog):
         self.new_password.setEchoMode(QLineEdit.Password)
         self.new_password.setStyleSheet(f'border: 1px solid #{bright_border};')
         self.password_isVisible = False
-        ## see / not to see
+        # see / not to see
         self.is_visible = QPushButton(self.new_password)
         self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
         self.is_visible.setCursor(Qt.ArrowCursor)
         self.is_visible.setStyleSheet('border: 0px;')
         self.is_visible.clicked.connect(self.visible)
         self.is_visible.move(self.new_password.width() - 30, self.new_password.height() // 4)
-        ## alert label
+        # alert label
         self.alert = QLabel(self)
         self.alert.setText('')
         self.alert.setFont(QFont('Arial Nova Light', 8))
@@ -652,16 +660,16 @@ class CreatePassword(QDialog):
         self.alert.setStyleSheet(f'color: #{bright_alert}')
         self.alert.move(self.new_password.geometry().x(), self.new_password.geometry().y() + 32)
 
-        ### confirm button
+        # confirm button
         self.confirmButton = QPushButton(self)
         self.confirmButton.setFixedSize(100, 30)
         self.confirmButton.move((self.width() - self.confirmButton.width()) // 2, 200)
         self.confirmButton.released.connect(lambda: self.save())
-        ## set the confirmButton shortcut
+        # set the confirmButton shortcut
         self.shortcut = QShortcut(QKeySequence("Return"), self)
         self.shortcut.activated.connect(lambda: self.save())
 
-        ### translate
+        # translate
         self.translate(self.main_self.language)
 
     def translate(self, language):

@@ -3,6 +3,7 @@ import hashlib
 
 ## variables:
 alpha = "AÁÀÂÄÆBCÇDEÉÈÊËFGHIÍÌÎÏJKLMNOÒÓÔÖŒPQRSTUÚÙÛÜVWXYÝŸZaáàâäæbcçdeéèêëfghiíìîïjklmnoòóôöœpqrstuúùûüvwxyýÿz0123456789!#$%&'()*+,-./:;<=>?@[]^_`{|}~µ\\ñ"
+alpha_simple = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&é\"'(-è_çà)=~#{}[]|`\\^¨$£¤*µù%!§:/;.,?"
 dico_char_int = {'Á': 1, 'À': 2, 'Â': 3, 'Ä': 4, 'Æ': 5, 'B': 6, 'C': 7, 'Ç': 8, 'D': 9, 'E': 10, 'É': 11, 'È': 12,
                  'Ê': 13, 'Ë': 14, 'F': 15, 'G': 16, 'H': 17, 'I': 18, 'Í': 19, 'Ì': 20, 'Î': 21, 'Ï': 22, 'J': 23,
                  'K': 24, 'L': 25, 'M': 26, 'N': 27, 'O': 28, 'Ò': 29, 'Ó': 30, 'Ô': 31, 'Ö': 32, 'Œ': 33, 'P': 34,

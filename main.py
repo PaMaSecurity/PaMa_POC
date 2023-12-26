@@ -274,7 +274,7 @@ class Window(QMainWindow):
 				'QMenu::item:selected{background-color: #' + bright_background_hover + ';}')
 		editMenu.triggered.connect(lambda: self.edit_account(index))
 		self.rightClickMenu.addAction(editMenu)
-		deleteMenu.triggered.connect(lambda: self.delete(index))
+		deleteMenu.triggered.connect(lambda: delete(self, index))
 		self.rightClickMenu.addAction(deleteMenu)
 		self.rightClickMenu.popup(QCursor.pos())
 		self.rightClickMenu.closeSignal.connect(lambda: self.items[index].setSelected(False))

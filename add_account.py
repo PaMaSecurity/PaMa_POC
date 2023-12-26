@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QFrame, QLabel, QLineEdit, QPushButton, QMessageBox, QAction, QApplication, QCompleter, QComboBox
+from PyQt5.QtWidgets import QDialog, QFrame, QLabel, QLineEdit, QPushButton, QMessageBox, QApplication, QCompleter
 from PyQt5.QtGui import QIcon, QFont
 from additions.constants import *
 from additions.cryptography import *
@@ -156,7 +156,7 @@ class AddAccount(QDialog):
         self.is_visible = QPushButton(self.new_accPassword)
         self.is_visible.setCursor(Qt.ArrowCursor)
         if self.main_self.theme == dark:
-            self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+            self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
         elif self.main_self.theme == bright:
             self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
         self.is_visible.setStyleSheet('border: 0px;')
@@ -329,34 +329,6 @@ class AddAccount(QDialog):
                 self.new_accAliasError.setText('Le nom est déjà pris...')
             elif self.main_self.language == english:
                 self.new_accAliasError.setText('The name is already taken...')
-        # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        # elif new_folder == new_name or new_folder == new_alias:
-        #     if new_folder == new_name:
-        #         if self.main_self.theme == dark:
-        #             self.new_accName.setStyleSheet(
-        #                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
-        #         elif self.main_self.theme == bright:
-        #             self.new_accName.setStyleSheet(
-        #                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
-        #         # ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
-        #         if self.main_self.language == french:
-        #             self.new_accNameError.setText('Le nom du compte ne peut pas être le même que le nom du dossier')
-        #         elif self.main_self.language == english:
-        #             self.new_accNameError.setText('The account name cannot be the same as the folder name')
-        #     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        #     else:
-        #         if self.main_self.theme == dark:
-        #             self.new_accAlias.setStyleSheet(
-        #                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px; border-bottom-color: #{dark_alert};')
-        #         elif self.main_self.theme == bright:
-        #             self.new_accAlias.setStyleSheet(
-        #                 f'background: #{bright_background}; border: 1px solid #{bright_entry_border}; border-radius: 1px; border-bottom: 2px solid #{bright_alert};')
-        #         # ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
-        #         if self.main_self.language == french:
-        #             self.new_accAliasError.setText("Le nom de l'alias ne peut pas être le même que le nom du dossier")
-        #         elif self.main_self.language == english:
-        #             self.new_accAliasError.setText('The alias name cannot be the same as the folder name')
-        ################################################################################################################
         else:
             with open('files/password.txt', 'a') as f:
                 if new_alias != '':
@@ -408,14 +380,14 @@ class AddAccount(QDialog):
         if not self.password_isVisible:
             self.new_accPassword.setEchoMode(QLineEdit.Normal)
             if self.main_self.theme == dark:
-                self.is_visible.setIcon(QIcon('resources/dark_close_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_close_eye.svg'))
             elif self.main_self.theme == bright:
                 self.is_visible.setIcon(QIcon('resources/close_eye.svg'))
             self.password_isVisible = True
         else:
             self.new_accPassword.setEchoMode(QLineEdit.Password)
             if self.main_self.theme == dark:
-                self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
             elif self.main_self.theme == bright:
                 self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
             self.password_isVisible = False

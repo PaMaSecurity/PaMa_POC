@@ -1,8 +1,7 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QFrame, QLabel, QLineEdit, QPushButton, QMessageBox, QAction, QApplication, QCompleter, QComboBox
+from PyQt5.QtWidgets import QDialog, QFrame, QLabel, QLineEdit, QPushButton, QMessageBox, QApplication, QCompleter
 from PyQt5.QtGui import QIcon, QFont
 import random
-from add_folder import AddFolder
 from additions.cryptography import *
 from additions.constants import *
 
@@ -167,7 +166,7 @@ class EditAccount(QDialog):
         self.is_visible = QPushButton(self.new_accPassword)
         self.is_visible.setCursor(Qt.ArrowCursor)
         if self.main_self.theme == dark:
-            self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+            self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
         elif self.main_self.theme == bright:
             self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
         self.is_visible.setStyleSheet('border: 0px;')
@@ -565,14 +564,14 @@ class EditAccount(QDialog):
         if not self.password_isVisible:
             self.new_accPassword.setEchoMode(QLineEdit.Normal)
             if self.main_self.theme == dark:
-                self.is_visible.setIcon(QIcon('resources/dark_close_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_close_eye.svg'))
             elif self.main_self.theme == bright:
                 self.is_visible.setIcon(QIcon('resources/close_eye.svg'))
             self.password_isVisible = True
         else:
             self.new_accPassword.setEchoMode(QLineEdit.Password)
             if self.main_self.theme == dark:
-                self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
             elif self.main_self.theme == bright:
                 self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
             self.password_isVisible = False

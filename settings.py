@@ -147,7 +147,7 @@ class WindowSettings(QDialog):
         self.is_visible = QPushButton(self.change_passwordEntry)
         self.is_visible.setCursor(Qt.ArrowCursor)
         if self.main_self.theme == dark:
-            self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+            self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
         elif self.main_self.theme == bright:
             self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
         self.is_visible.setStyleSheet('border: 0px;')
@@ -341,14 +341,14 @@ class WindowSettings(QDialog):
         if not self.password_isVisible:
             self.change_passwordEntry.setEchoMode(QLineEdit.Normal)
             if self.main_self.theme == dark:
-                self.is_visible.setIcon(QIcon('resources/dark_close_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_close_eye.svg'))
             elif self.main_self.theme == bright:
                 self.is_visible.setIcon(QIcon('resources/close_eye.svg'))
             self.password_isVisible = True
         else:
             self.change_passwordEntry.setEchoMode(QLineEdit.Password)
             if self.main_self.theme == dark:
-                self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
             elif self.main_self.theme == bright:
                 self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
             self.password_isVisible = False
@@ -465,9 +465,9 @@ class WindowSettings(QDialog):
             self.change_passwordEntry.setStyleSheet(
                 f'background: #{dark_background}; color: #{dark_color}; border: 1px solid #{dark_entry_border}; border-radius: 1px;')
             if self.password_isVisible:
-                self.is_visible.setIcon(QIcon('resources/dark_close_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_close_eye.svg'))
             else:
-                self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
             self.confirm_passwordButton.setStyleSheet(
                 'QPushButton{background: #' + dark_background + '; color: #' + dark_color + '; border: 1px solid #' + dark_border + '; border-radius: 2px;}' +
                 'QPushButton:hover{background: #' + dark_background_hover + ';}')
@@ -582,7 +582,7 @@ class TestPassword(QDialog):
         ## see / not to see
         self.is_visible = QPushButton(self.passwordEntry)
         if self.self.main_self.theme == dark:
-            self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+            self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
         elif self.self.main_self.theme == bright:
             self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
         self.is_visible.setCursor(Qt.ArrowCursor)
@@ -627,14 +627,14 @@ class TestPassword(QDialog):
         if not self.password_isVisible:
             self.passwordEntry.setEchoMode(QLineEdit.Normal)
             if self.self.main_self.theme == dark:
-                self.is_visible.setIcon(QIcon('resources/dark_close_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_close_eye.svg'))
             elif self.self.main_self.theme == bright:
                 self.is_visible.setIcon(QIcon('resources/close_eye.svg'))
             self.password_isVisible = True
         else:
             self.passwordEntry.setEchoMode(QLineEdit.Password)
             if self.self.main_self.theme == dark:
-                self.is_visible.setIcon(QIcon('resources/dark_open_eye.png'))
+                self.is_visible.setIcon(QIcon('resources/dark_open_eye.svg'))
             elif self.self.main_self.theme == bright:
                 self.is_visible.setIcon(QIcon('resources/open_eye.svg'))
             self.password_isVisible = False
